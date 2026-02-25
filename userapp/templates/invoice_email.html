@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Order Invoice</title>
+  <style>
+    body { font-family:Arial,Helvetica,sans-serif; color:#153423; }
+    .card { max-width:700px; margin:18px auto; border:1px solid #e6efe9; border-radius:8px; padding:18px; }
+    .header { display:flex; gap:12px; align-items:center; }
+    .header img { height:50px; }
+    .h1 { font-size:18px; margin:0; color:#0b3a2d; }
+    .muted { color:#6b7280; font-size:13px; }
+    .cta { display:inline-block; margin-top:14px; padding:10px 14px; background:#10b981; color:#fff; border-radius:6px; text-decoration:none; }
+    .items { margin-top:16px; font-size:14px; }
+    .items td { padding:6px 10px; }
+    .total { margin-top:12px; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <img src="{{ logo_url }}" alt="logo">
+      <div>
+        <div class="h1">Thanks for your order</div>
+        <div class="muted">Order #: {{ order.id }} · Date: {{ now|date:"d M Y" }}</div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">Hi {{ user.name }},<br/>Thank you for shopping with {{ site_name }}. Your order has been received and is being processed. Please find your invoice attached.</p>
+
+    <table class="items" width="100%">
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td>{{ it.product.title }}{% if it.variant %} - {{ it.variant.name }}{% endif %}</td>
+          <td style="text-align:right;">₹{{ it.price }} × {{ it.quantity }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="total">Total: ₹{{ order.total_amount }}</div>
+
+    {% if invoice_download_url %}
+      <p style="margin-top:12px;">You can download your invoice: <a href="{{ invoice_download_url }}">Download Invoice</a></p>
+    {% endif %}
+
+    <a href="#" class="cta">View your orders</a>
+
+    <p class="muted" style="margin-top:18px;">If you need help, reply to this email or contact support.</p>
+  </div>
+</body>
+</html>

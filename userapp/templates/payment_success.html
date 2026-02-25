@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f9f4;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            overflow: hidden;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+        }
+        .popup.show {
+            display: block;
+        }
+        .tick-animation {
+            font-size: 80px;
+            color: #28a745;
+            animation: bounceIn 1s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .popup h2 {
+            color: #1b5e20;
+            margin-top: 20px;
+        }
+        .popup p {
+            color: #555;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay show" id="overlay"></div>
+    <div class="popup show" id="successPopup">
+        <div class="tick-animation">&#10003;</div>
+        <h2>Payment Successful!</h2>
+        <p>Thank you for your purchase. You will be redirected shortly.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show popup and animation
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('successPopup').classList.add('show');
+                document.getElementById('overlay').classList.add('show');
+            }, 500);
+
+            // Redirect after 3 seconds
+            setTimeout(() => {
+                window.location.href = "{% url 'userorders' %}";
+            }, 3000);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+{% extends 'adminbase.html' %}
+{% load static stock_filters %}
+{% block admin %}
+<div class="container py-3">
+  <div class="row mb-3 align-items-center">
+    <div class="col">
+      <h4 class="text-success mb-0">Stock Management</h4>
+      <small class="text-muted">Monitor inventory and add stock quickly.</small>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'addproduct' %}" class="btn btn-outline-success">Add Product</a>
+    </div>
+  </div>
+
+  <!-- Filters card -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <form class="row g-2 align-items-center" method="get">
+        <div class="col-auto">
+          <select name="filter_type" id="filter-type" class="form-select">
+            <option value="product" {% if filter_type == 'product' %}selected{% endif %}>Product</option>
+            <option value="category" {% if filter_type == 'category' %}selected{% endif %}>Category</option>
+          </select>
+        </div>
+        <div class="col">
+          <div style="position:relative;">
+            <input id="checkstock-search" name="q" class="form-control" placeholder="Search..." value="{{ q }}" data-endpoint="{% url 'checkstock_search' %}" autocomplete="off">
+            <div id="checkstock-results" class="list-group position-absolute w-100" style="z-index:1200; display:none; max-height:260px; overflow:auto"></div>
+          </div>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Products list (improved) -->
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>S.No</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Unit</th>
+              <th>Available</th>
+              <th>Capacity</th>
+              <th>Remaining</th>
+              <th>Last Update</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body">
+            {% for row in items %}
+            {% with p=row.product %}
+            <tr id="product-row-{{ p.id }}" class="product-row">
+              <td>{{ forloop.counter0|add:products_page.start_index }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  {% if p.cover_image %}
+                    <img src="{{ p.cover_image.url }}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:6px;">
+                  {% else %}
+                    <div style="width:56px;height:56px;background:#f7f7f7;border-radius:6px;"></div>
+                  {% endif %}
+                  <div>
+                    <div class="fw-bold">{{ p.title }}</div>
+                    <div class="small text-muted">{{ p.description|truncatechars:80 }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ p.category.name }}</td>
+              <td>{{ p.unit.name }}</td>
+
+              <!-- Available: integer + unit -->
+              <td>
+                {% with st=row.stock %}
+                  {% if st is not None %}
+                    {{ st|human_weight }}
+                  {% else %}
+                    0 {{ p.unit.name }}
+                  {% endif %}
+                {% endwith %}
+              </td>
+
+              <td>{% if row.max_stock and row.max_stock > 0 %}{{ row.max_stock|floatformat:0 }}{% else %} -{% endif %} {{ p.unit.name }}</td>
+
+              <td style="min-width:220px;">
+                {% if row.stock == 0 %}
+                  <span class="badge bg-danger">Out of Stock</span>
+                {% else %}
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-fill" style="height:10px;">
+                      <div class="progress-bar {{ row.color }}" role="progressbar" style="width: {{ row.pct }}%;" aria-valuenow="{{ row.pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div style="min-width:60px" class="small text-muted text-end">{{ row.label }}</div>
+                  </div>
+                {% endif %}
+              </td>
+              <td>
+                {% if row.last_stock_update %}
+                  <div class="small text-muted">{{ row.last_stock_update|date:"Y-m-d H:i" }}</div>
+                {% else %}
+                  <div class="small text-muted">-</div>
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+                <button class="btn btn-sm btn-primary btn-add-stock" 
+                  data-id="{{ p.id }}" 
+                  data-title="{{ p.title|escapejs }}" 
+                  data-stock="{{ row.stock }}" 
+                  data-max="{{ row.max_stock|default:'' }}">
+                  <i class="ti ti-plus"></i> Add Stock
+                </button>
+              </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr><td colspan="9" class="text-center text-muted py-4">No products found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- paginator -->
+      <div class="p-3">
+        {% if is_paginated %}
+        <nav>
+          <ul class="pagination mb-0">
+            {% if products_page.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ products_page.previous_page_number }}&filter_type={{ filter_type }}&q={{ q }}">Prev</a></li>
+            {% else %}<li class="page-item disabled"><span class="page-link">Prev</span></li>{% endif %}
+            <li class="page-item active"><span class="page-link">{{ products_page.number }} / {{ paginator.num_pages }}</span></li>
+            {% if products_page.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ products_page.next_page_number }}&filter_type={{ filter_type }}&q={{ q }}">Next</a></li>
+            {% else %}<li class="page-item disabled"><span class="page-link">Next</span></li>{% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Stock Modal (enhanced) -->
+<div class="modal fade" id="addStockModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form id="addStockForm" method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Add Stock</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <input type="hidden" id="add-stock-product-id" name="product_id">
+        <div class="modal-body">
+          <div class="mb-2">
+            <div class="fw-bold" id="add-stock-product-title"></div>
+            <div class="small text-muted">Current stock: <span id="add-stock-current"></span></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount to add</label>
+            <input type="number" step="0.001" name="amount" id="add-stock-amount" class="form-control" required>
+            <div class="invalid-feedback">Enter an amount.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Max Capacity (optional)</label>
+            <input type="number" step="0.001" name="max_stock" id="add-stock-max" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason (optional)</label>
+            <input type="text" name="reason" class="form-control" placeholder="e.g. new delivery">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" type="submit">Add Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Search autocomplete (products/categories)
+  const searchInput = document.getElementById('checkstock-search');
+  const resultsBox = document.getElementById('checkstock-results');
+  let timer = null;
+  if (searchInput) {
+    searchInput.addEventListener('input', function(){
+      const q = this.value.trim();
+      resultsBox.style.display = 'none';
+      if (timer) clearTimeout(timer);
+      if (!q) return;
+      const endpoint = this.dataset.endpoint;
+      const type = document.getElementById('filter-type').value || 'product';
+      timer = setTimeout(()=>{
+        fetch(`${endpoint}?type=${encodeURIComponent(type)}&q=${encodeURIComponent(q)}`, {credentials:'same-origin'})
+          .then(r => r.ok ? r.json() : Promise.reject())
+          .then(data=>{
+            resultsBox.innerHTML = '';
+            if(!data.results || data.results.length===0){
+              resultsBox.innerHTML = '<div class="list-group-item small text-muted">No results</div>';
+            } else {
+              data.results.forEach(item=>{
+                const a = document.createElement('a');
+                a.href = '#';
+                a.className = 'list-group-item list-group-item-action d-flex align-items-center';
+                a.style.cursor='pointer';
+                if(type==='product'){
+                  const img = item.image ? `<img src="${item.image}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:8px;">` : '<div style="width:40px;height:40px;background:#f6f6f6;border-radius:6px;margin-right:8px;"></div>';
+                  a.innerHTML = `${img}<div style="flex:1;"><strong>${item.title}</strong><div class="small text-muted">₹${item.price}${item.unit? ' /'+item.unit:''}</div></div><div class="text-success">Select</div>`;
+                  a.addEventListener('click', ev=>{
+                    ev.preventDefault();
+                    // fill search box with selected product (do NOT submit)
+                    searchInput.value = item.title;
+                    // store selected id for later if needed
+                    searchInput.dataset.selectedId = item.id;
+                    // if category information provided, set it but do not auto submit
+                    try {
+                      const categorySelect = document.getElementById('filter-type');
+                      // ensure filter type remains 'product'
+                      if (categorySelect) categorySelect.value = 'product';
+                    } catch(e) {}
+                    resultsBox.style.display = 'none';
+                    searchInput.focus();
+                  });
+                } else {
+                  a.innerHTML = `<div style="flex:1;"><strong>${item.name}</strong></div><div class="text-success">Select</div>`;
+                  a.addEventListener('click', ev=>{
+                    ev.preventDefault();
+                    // fill search box with selected category (do NOT submit)
+                    searchInput.value = item.name;
+                    searchInput.dataset.selectedCategoryId = item.id;
+                    // set filter_type to category
+                    const ft = document.getElementById('filter-type');
+                    if (ft) ft.value = 'category';
+                    resultsBox.style.display = 'none';
+                    searchInput.focus();
+                  });
+                }
+                resultsBox.appendChild(a);
+              });
+            }
+            resultsBox.style.display = 'block';
+          }).catch(()=>{ resultsBox.innerHTML = '<div class="list-group-item small text-danger">Search error</div>'; resultsBox.style.display='block'; });
+      }, 200);
+    });
+
+    document.addEventListener('click', function(e){
+      if (!searchInput.contains(e.target) && !resultsBox.contains(e.target)) resultsBox.style.display='none';
+    });
+  }
+
+  // Add stock button logic
+  const modalEl = document.getElementById('addStockModal');
+  const addForm = document.getElementById('addStockForm');
+  document.querySelectorAll('.btn-add-stock').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const id = this.dataset.id;
+      const title = this.dataset.title;
+      const stock = this.dataset.stock || '0';
+      const max = this.dataset.max || '';
+      addForm.action = `/adminapp/product/${id}/add-stock/`;
+      document.getElementById('add-stock-product-id').value = id;
+      document.getElementById('add-stock-product-title').innerText = title;
+      document.getElementById('add-stock-current').innerText = `${parseFloat(stock || 0).toFixed(0)} ${this.closest('tr').querySelector('td:nth-child(4)').innerText}`;
+      document.getElementById('add-stock-amount').value='';
+      document.getElementById('add-stock-max').value='';
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+      }
+    });
+  });
+
+  // submit validation
+  if (addForm) {
+    addForm.addEventListener('submit', function(e){
+      if (!addForm.checkValidity()) { e.preventDefault(); e.stopPropagation(); addForm.classList.add('was-validated'); }
+    }, false);
+  }
+
+  // Scroll-to logic (if server passed scroll_to in query param)
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    const scrollId = params.get('scroll_to');
+    if (!scrollId) return;
+    const el = document.getElementById('product-row-' + scrollId);
+    if (el) {
+      setTimeout(()=>{
+        el.scrollIntoView({behavior:'smooth', block:'center'});
+        el.classList.add('alert-highlight');
+        setTimeout(()=> el.classList.remove('alert-highlight'), 4000);
+      }, 300);
+    }
+  })();
+
+})();
+</script>
+
+<style>
+/* highlight animation when navigated from alert */
+.alert-highlight {
+  transition: background-color 0.4s ease;
+  background: linear-gradient(90deg, rgba(255,249,205,0.9), rgba(255,255,255,0));
+}
+</style>
+
+{% endblock %}

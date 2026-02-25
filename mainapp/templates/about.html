@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block main %}
+<style>
+  /* About page hero styling to match homepage with navbar overlap */
+  .about-hero {
+    min-height: clamp(60vh, 78vh, 95vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 0; /* sit under navbar */
+    margin-top: -120px;
+    padding-top: 110px;
+    background-image: url('{% static "img/about-hero.jpeg" %}');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  .about-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,31,12,0.45);
+  }
+  .about-hero-content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    text-align: center;
+    max-width: 980px;
+    padding: 0 16px;
+  }
+  .about-hero-content h1 {
+    color: #fff;
+    font-size: clamp(1.6rem, 3.6vw, 3.2rem);
+    line-height: 1.05;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+  }
+  .about-hero-content p {
+    color: rgba(255,255,255,0.95);
+    margin-bottom: 18px;
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+  }
+  @media (max-width: 768px) {
+    .about-hero {
+      padding-top: 120px;
+    }
+  }
+  /* Modern card styles for mission & team */
+  .cards-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+    max-width:1100px;
+    margin:30px auto;
+    padding:0 16px;
+  }
+  .card{
+    background: linear-gradient(180deg,#ffffff,#fbfffb);
+    border-radius:12px;
+    padding:22px;
+    box-shadow: 0 10px 30px rgba(10,40,20,0.06);
+    border: 1px solid rgba(34,125,50,0.06);
+    transition: transform .22s ease, box-shadow .22s ease;
+  }
+  .card:hover{ transform: translateY(-6px); box-shadow:0 18px 48px rgba(10,40,20,0.09); }
+  .card h3{ margin:0 0 8px; color:#164b20; font-size:1.15rem; font-weight:800; }
+  .card p{ margin:0; color:var(--muted); line-height:1.6; }
+
+  /* Enhanced mission card visuals */
+  .card{ position:relative; overflow:hidden; padding:26px 26px 28px 36px; background:linear-gradient(180deg,#ffffff,#f8fffa); }
+  .card::before{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 12% 18%, rgba(40,167,69,0.06), transparent 22%); pointer-events:none; }
+  .accent-stripe{ position:absolute; left:0; top:0; bottom:0; width:8px; background:linear-gradient(180deg,#2fb34a,#1d8b2f); border-top-left-radius:12px; border-bottom-left-radius:12px; }
+  .icon-circle{ width:56px; height:56px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(135deg,#e6fff0,#d7f7e6); margin-bottom:12px; box-shadow:0 6px 20px rgba(20,60,30,0.04); }
+  .card h3{ margin:4px 0 8px; color:#06421b; font-size:1.18rem; font-weight:900; }
+  .card .lead-small{ display:block; color:#1f7a3f; font-weight:700; font-size:.95rem; margin-bottom:6px; }
+  .card .desc{ margin:0 0 14px; color:var(--muted); line-height:1.6; }
+
+  /* CTA button (modern primary) */
+  .card-cta{ display:inline-grid; grid-auto-flow:column; gap:10px; align-items:center; padding:10px 14px; background:linear-gradient(90deg,#2fb34a,#1f8b37); color:#fff; border-radius:12px; text-decoration:none; font-weight:800; box-shadow:0 12px 34px rgba(30,110,50,0.12); border:1px solid rgba(255,255,255,0.06); }
+  .card-cta:hover{ transform:translateY(-3px); box-shadow:0 20px 50px rgba(30,110,50,0.16); }
+
+  /* decorative flourish */
+  .card::after{ content:""; position:absolute; right:-40px; top:-30px; width:140px; height:140px; background: radial-gradient(circle at 30% 30%, rgba(42,163,55,0.06), transparent 30%); transform: rotate(18deg); pointer-events:none; }
+
+  /* animated icon */
+  .icon-anim{ transform-origin:center; transition: transform .45s cubic-bezier(.2,.9,.3,1); }
+  .card:hover .icon-anim{ transform: translateY(-6px) rotate(-6deg) scale(1.03); }
+
+  /* glassy backdrop and stronger hover for the whole card */
+  .card{ backdrop-filter: blur(6px) saturate(120%); -webkit-backdrop-filter: blur(6px) saturate(120%); }
+  .card:hover{ transform: translateY(-8px) scale(1.01); box-shadow:0 28px 70px rgba(8,40,18,0.14); }
+
+  @media (max-width:640px){ .card{ padding-left:20px; } .icon-circle{ width:48px;height:48px; } }
+
+  .team-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; max-width:1100px; margin:0 auto; padding:0 16px; }
+  .team-card{ background:#fff; border-radius:12px; padding:18px; text-align:center; box-shadow:0 10px 30px rgba(10,40,20,0.06); transition: transform .22s ease, box-shadow .22s ease; }
+  .team-card:hover{ transform: translateY(-8px); box-shadow:0 20px 50px rgba(10,40,20,0.1); }
+  .avatar{ width:110px; height:110px; border-radius:999px; object-fit:cover; border:6px solid #f1fff2; box-shadow:0 12px 28px rgba(20,60,30,0.08); display:inline-block; }
+  .member-name{ margin:12px 0 4px; font-size:1.05rem; color:#123; font-weight:800; }
+  .role{ color:var(--muted); font-size:.95rem; }
+  .member-bio{ margin-top:10px; color:rgba(18,18,18,0.66); font-size:.92rem; }
+
+  /* Developer card — upgraded modern look */
+  .dev-card{ background:linear-gradient(180deg,#ffffff,#f6fffb); border-radius:16px; padding:28px 20px; box-shadow:0 22px 60px rgba(6,40,18,0.08); border:1px solid rgba(34,125,50,0.06); display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .dev-avatar{ width:128px; height:128px; border-radius:999px; object-fit:cover; border:8px solid #f6fff7; box-shadow:0 18px 46px rgba(15,60,25,0.09); }
+  .dev-badge{ position:relative; margin-top:-18px; background:linear-gradient(90deg,#2fb34a,#1e8b33); color:#fff; padding:6px 10px; border-radius:999px; font-weight:800; font-size:.78rem; box-shadow:0 6px 18px rgba(30,110,50,0.12); }
+  .dev-name{ font-size:1.15rem; font-weight:900; color:#0e3d1b; margin-top:6px; }
+  .dev-role{ color:#16612f; font-weight:700; font-size:.95rem; }
+  .dev-bio{ color:rgba(18,18,18,0.72); text-align:center; max-width:320px; margin-top:6px; }
+  .skill-chips{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+  .skill-chips span{ background:rgba(47,179,74,0.08); color:#196833; padding:6px 10px; border-radius:999px; font-weight:700; font-size:.82rem; }
+  .social-links{ display:flex; gap:10px; margin-top:12px; }
+  .social-links a{ display:inline-grid; place-items:center; width:40px; height:40px; border-radius:10px; background:rgba(10,40,20,0.03); color:#164b20; text-decoration:none; box-shadow:0 6px 18px rgba(10,40,20,0.03); }
+  .social-links svg{ width:18px; height:18px; fill:currentColor; }
+  @media (max-width:560px){ .dev-avatar{ width:110px;height:110px; } .dev-bio{ max-width:260px; } }
+</style>
+
+<!-- About Hero Section -->
+<section class="about-hero">
+  <div class="about-hero-overlay" aria-hidden="true"></div>
+  <div class="container about-hero-content" data-aos="fade-up" role="region" aria-label="About page hero">
+    <h1 class="fw-bold">About FreshHarvest</h1>
+    <p class="lead mb-0">Farm-fresh, organic produce delivered with care — supporting local farmers and healthy homes.</p>
+  </div>
+</section>
+
+<div style="--brand:#28a745; --muted:#6c757d; margin-top: 20px;">
+
+    <div class="container" style="max-width:1100px; margin:0 auto;">
+      <div style="display:flex; gap:28px; align-items:stretch; flex-wrap:wrap;">
+        <div style="flex:1 1 420px; min-width:280px;">
+          
+          <img src="{% static 'img/ab.png' %}" alt="Organic Farm" style="width:100%; height:auto; border-radius:14px; box-shadow:0 18px 40px rgba(15,60,25,0.06); object-fit:cover;">
+        </div>
+
+        <div style="flex:1 1 420px; min-width:280px; display:flex; flex-direction:column; gap:14px; justify-content:center;">
+          <h2 style="margin:0; color:var(--brand); font-size:1.6rem; font-weight:800;">Who We Are</h2>
+          <p style="margin:0; color:var(--muted); font-size:1rem; line-height:1.6;">
+            At FreshHarvest we connect growers and households — delivering seasonal, responsibly grown produce so you can cook with confidence. We focus on freshness, fair pricing and minimal handling to keep produce natural and nutritious.
+          </p>
+
+          <ul style="list-style:none;padding:0;margin:0; display:grid; gap:10px; margin-top:6px;">
+            <li style="display:flex; gap:10px; align-items:flex-start;"><span style="color:var(--brand); font-weight:800; min-width:26px;">✓</span><span style="color:#333;">100% organic & carefully selected</span></li>
+            <li style="display:flex; gap:10px; align-items:flex-start;"><span style="color:var(--brand); font-weight:800; min-width:26px;">✓</span><span style="color:#333;">Direct farm-to-door delivery</span></li>
+            <li style="display:flex; gap:10px; align-items:flex-start;"><span style="color:var(--brand); font-weight:800; min-width:26px;">✓</span><span style="color:#333;">Sustainable packaging & transparent sourcing</span></li>
+          </ul>
+
+          <div style="margin-top:12px;">
+            <a href="{% url 'products' %}" style="display:inline-block; padding:10px 18px; background:linear-gradient(90deg,var(--brand),#2a9b37); color:#fff; border-radius:10px; text-decoration:none; font-weight:800; box-shadow:0 10px 28px rgba(40,120,60,0.12);">Shop Fresh Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- our mission -->
+
+  <section aria-label="Mission and Vision" style="padding:70px 16px; background: #e6f2ff; margin-top: 30px;" >
+    <div class="cards-grid" role="list">
+      <div class="card" role="listitem">
+        <span class="accent-stripe" aria-hidden="true"></span>
+        <div class="icon-circle" aria-hidden="true">
+          <!-- leaf svg -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M4 20c6-1 9-5 16-14C16 6 10 9 4 20z" fill="#2a9b37" />
+          </svg>
+        </div>
+        <span class="lead-small">Freshness & Community</span>
+        <h3>Our Mission</h3>
+        <p class="desc">Make fresh, healthy produce accessible while empowering farmers and reducing waste through fair sourcing and minimal handling.</p>
+        <a class="card-cta" href="{% url 'products' %}">
+          <span>Shop seasonal picks</span>
+        </a>
+      </div>
+
+      <div class="card" role="listitem">
+        <span class="accent-stripe" aria-hidden="true"></span>
+        <div class="icon-circle" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2c0 10-6 14-6 20 6-4 10-6 14-10S12 2 12 2z" fill="#2a9b37" />
+          </svg>
+        </div>
+        <span class="lead-small">Sustainability</span>
+        <h3>Our Vision</h3>
+        <p class="desc">A healthy community supported by sustainable farming, transparent sourcing and fair trade practices that value people and planet.</p>
+        <a class="card-cta" href="#">
+          <span>Learn more</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+<!-- our mission end -->
+
+<!-- our developer -->
+  <section aria-label="Team" style="padding:40px 16px; background:linear-gradient(180deg,#f9fff9,#f0fff2);">
+    <div class="container" style="max-width:1100px;margin:0 auto;text-align:center;">
+      <h2 style="margin:0 0 18px;color:#164b20;font-weight:800;">Meet Developer</h2>
+      <p style="margin:0 0 24px;color:var(--muted);">Passionate people working to bring fresh produce to your table.</p>
+
+      <div class="team-grid" role="list">
+         <!-- meet developer section -->
+
+        <div class="team-card dev-card" role="listitem" aria-label="Developer card">
+        
+          <img class="dev-avatar object-fit-contain" src="{% static 'img/profile.jpg' %}" alt="Shreyansh Srivastava">
+          <div class="dev-badge">Developer</div>
+          <div class="dev-name">Shreyansh Srivastava</div>
+          <div class="dev-role">Software Engineer</div>
+          <p class="dev-bio">Python & Django developer focused on building performant, maintainable web applications. LLM learner and automation enthusiast.</p>
+          <div class="skill-chips" aria-hidden="true">
+            <span>Python</span>
+            <span>Django</span>
+            <span>AI</span>
+          </div>
+          <div class="social-links" role="group" aria-label="social links">
+            <a href="www.linkedin.com/in/shreyansh-srivastava-192780290" target="_blank" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 24h5V7H0v17zM7.5 7h4.8v2.3h.1c.7-1.3 2.4-2.6 5-2.6 5.3 0 6.3 3.5 6.3 8v11h-5v-9.7c0-2.3-.04-5.2-3.2-5.2-3.2 0-3.7 2.5-3.7 5.1V24h-5V7z"/></svg>
+            </a>
+            <a href="https://github.com/shreydev07" target="_blank" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 .5C5.7.5.9 5.3.9 11.6c0 4.6 3 8.5 7.1 9.9.5.1.7-.2.7-.5v-1.9c-2.9.6-3.5-1.2-3.5-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.3 1.1 2.8.9.1-.7.4-1.1.7-1.4-2.3-.3-4.7-1.2-4.7-5.4 0-1.2.4-2.2 1-3-.1-.3-.4-1.5.1-3.1 0 0 .8-.3 3 .9.9-.3 1.8-.4 2.8-.4s1.9.1 2.8.4c2.2-1.2 3-.9 3-.9.5 1.6.2 2.8.1 3.1.6.8 1 1.8 1 3 0 4.2-2.4 5.1-4.7 5.4.4.4.8 1 .8 2v3c0 .3.2.6.7.5 4.1-1.4 7.1-5.3 7.1-9.9C23.1 5.3 18.3.5 12 .5z"/></svg>
+            </a>
+          </div>
+        </div>
+
+       
+          
+      </div>
+    </div>
+  </section>
+
+  <!-- our team end -->
+
+  <section aria-label="CTA" style="padding:36px 16px;">
+    <div class="container" style="max-width:1100px;margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;">
+      <div style="flex:1 1 420px; min-width:260px;">
+        <h3 style="margin:0;color:#164b20;font-weight:800;">Want fresh produce delivered weekly?</h3>
+        <p style="margin:8px 0 0;color:var(--muted);">Subscribe to our updates and never miss the seasonal picks and offers.</p>
+      </div>
+      <div style="flex:0 0 auto;">
+        <a href="{% url 'index' %}" target="#newsletter-form" style="display:inline-block;padding:12px 18px;background:linear-gradient(90deg,var(--brand),#2a9b37);color:#fff;border-radius:10px;text-decoration:none;font-weight:800;box-shadow:0 12px 30px rgba(40,120,60,0.12);">Subscribe Now</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

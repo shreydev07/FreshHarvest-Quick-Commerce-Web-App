@@ -1,0 +1,320 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root{
+            --bg-1: #0f1724; /* deep navy */
+            --bg-2: #0b1020; /* darker */
+            --accent-a: #7c5cff; /* violet */
+            --accent-b: #2be7f4; /* cyan */
+            --glass: rgba(255,255,255,0.04);
+            --glass-2: rgba(255,255,255,0.02);
+            --muted: rgba(255,255,255,0.75);
+            --card-radius: 16px;
+        }
+
+        html,body{
+            height:100%;
+            margin:0;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: radial-gradient(1200px 400px at 10% 10%, rgba(124,92,255,0.08), transparent 8%),
+                        radial-gradient(1000px 360px at 90% 80%, rgba(43,231,244,0.06), transparent 6%),
+                        linear-gradient(180deg,var(--bg-1), var(--bg-2));
+            color:#e6eef8;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            overflow-y:auto;
+        }
+
+        /* Animated ambient shapes */
+        .ambient {
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            z-index:0;
+            mix-blend-mode:screen;
+            opacity:.55;
+            filter: blur(36px) saturate(120%);
+        }
+        .ambient::before, .ambient::after{
+            content:"";
+            position:absolute;
+            width:60vmax;
+            height:60vmax;
+            border-radius:50%;
+            transform:translate(-10%,-10%) rotate(12deg);
+            opacity:.45;
+        }
+        .ambient::before{
+            left:-20vmax; top:-18vmax;
+            background: radial-gradient(circle at 40% 40%, rgba(124,92,255,0.28), rgba(124,92,255,0.05) 30%, transparent 40%);
+            animation: floatSlow 16s ease-in-out infinite;
+        }
+        .ambient::after{
+            right:-16vmax; bottom:-12vmax;
+            width:46vmax; height:46vmax;
+            background: radial-gradient(circle at 60% 60%, rgba(43,231,244,0.26), rgba(43,231,244,0.04) 30%, transparent 45%);
+            animation: floatSlow 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatSlow {
+            0%{ transform: translateY(0) rotate(0deg) scale(1); }
+            50%{ transform: translateY(-8%) rotate(3deg) scale(1.06); }
+            100%{ transform: translateY(0) rotate(0deg) scale(1); }
+        }
+
+        .center-wrapper{
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:2rem;
+            position:relative;
+            z-index:1;
+        }
+
+        .glass-card{
+            width:460px;
+            max-width:95%;
+            background: linear-gradient(180deg, var(--glass), var(--glass-2));
+            border:1px solid rgba(255,255,255,0.05);
+            border-radius: var(--card-radius);
+            padding:34px;
+            box-shadow: 0 10px 40px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+            backdrop-filter: blur(12px) saturate(110%);
+            color:var(--muted);
+            transform: translateY(22px) scale(.995);
+            opacity:0;
+            transition: all 520ms cubic-bezier(.2,.9,.2,1);
+            position:relative;
+            overflow:hidden;
+        }
+
+        .glass-card.show{
+            transform: translateY(0) scale(1);
+            opacity:1;
+        }
+
+        /* Neon border accent */
+        .glass-card::after{
+            content:"";
+            position:absolute;
+            inset:-1px;
+            border-radius: calc(var(--card-radius) + 1px);
+            padding:1px;
+            pointer-events:none;
+            background: linear-gradient(90deg, rgba(124,92,255,0.12), rgba(43,231,244,0.12));
+            filter: blur(12px);
+            opacity:.6;
+            mix-blend-mode: screen;
+        }
+
+        .logo-wrap{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px;
+            margin-bottom:14px;
+        }
+        .logo-wrap img{
+            height:64px;
+            width:auto;
+            filter: drop-shadow(0 14px 30px rgba(12,18,30,0.6));
+            transition: transform .5s ease;
+        }
+        .logo-wrap img:hover{ transform: translateY(-4px) scale(1.02); }
+
+        .title{
+            text-align:center;
+            margin-bottom:6px;
+            font-weight:700;
+            color:#eef6ff;
+            letter-spacing:0.2px;
+            font-size:1.25rem;
+        }
+        .subtitle{
+            text-align:center;
+            margin-bottom:18px;
+            font-size:0.9rem;
+            color: rgba(230,238,248,0.78);
+        }
+
+        /* inputs - modern look */
+        .form-floating .form-control{
+            border-radius:12px;
+            padding:1.2rem .9rem .5rem .9rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border:1px solid rgba(255,255,255,0.05);
+            color:#e9f5ff;
+            height:56px;
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.01);
+            transition: box-shadow .18s ease, border-color .18s ease, transform .12s ease;
+        }
+        .form-floating label{
+            color: rgba(230,238,248,0.7);
+            padding-left:8px;
+            font-weight:500;
+        }
+        .form-control::placeholder{ color: rgba(230,238,248,0.28); }
+
+        .form-control:focus{
+            outline:none;
+            border-color: rgba(124,92,255,0.95);
+            box-shadow: 0 8px 30px rgba(124,92,255,0.08);
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.018);
+            color:#fff;
+        }
+
+        .input-with-icon{
+            position:relative;
+        }
+        .input-icon{
+            position:absolute;
+            right:12px;
+            top:50%;
+            transform:translateY(-50%);
+            color: rgba(230,238,248,0.6);
+            background: transparent;
+            border:none;
+            padding:6px;
+            cursor:pointer;
+        }
+        .input-icon:focus{ outline:none; }
+
+        .btn-cta{
+            border-radius: 12px;
+            padding: .72rem;
+            font-weight:700;
+            letter-spacing: .3px;
+            background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+            border: none;
+            color: #061122;
+            box-shadow: 0 12px 36px rgba(11,12,30,0.52);
+            transition: transform .18s ease, box-shadow .18s, filter .18s;
+        }
+        .btn-cta:hover{
+            transform: translateY(-4px) scale(1.01);
+            filter: brightness(1.04);
+            box-shadow: 0 22px 56px rgba(11,12,30,0.6);
+        }
+
+        .muted-note{
+            color: rgba(230,238,248,0.72);
+            font-size: .9rem;
+            margin-top: 1rem;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .muted-note a{ color: #dff9ff; text-decoration:none; font-weight:600; opacity:.92; }
+
+        .alert{
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        /* small floating animation for card on hover */
+        @keyframes floaty {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(-0.18deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .glass-card:hover{ animation: floaty 6s ease-in-out infinite; }
+
+        /* subtle focus ring for accessibility */
+        .form-control:focus-visible{
+            box-shadow: 0 6px 30px rgba(43,231,244,0.06), 0 0 0 4px rgba(43,231,244,0.06);
+        }
+
+        /* responsive tweaks */
+        @media (max-width:576px){
+            .glass-card{ padding:20px; border-radius:12px; }
+            .logo-wrap img{ height:56px; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ambient gradient shapes -->
+    <div class="ambient" aria-hidden="true"></div>
+
+    <div class="center-wrapper">
+        <div class="glass-card" id="loginCard" role="main" aria-labelledby="adminTitle">
+            <div class="logo-wrap">
+                <img src="{% static 'img/freshHarvest.png' %}" alt="FreshHarvest Logo">
+            </div>
+
+            <h4 id="adminTitle" class="title">Admin Console</h4>
+            <div class="subtitle">Secure access — enter your credentials</div>
+
+            {% if messages %}
+            {% for m in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ m }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-floating mb-3 input-with-icon">
+                    <input type="text" name="username" class="form-control" id="floatingInput" placeholder="username" autocomplete="username" required>
+                    <label for="floatingInput">Username</label>
+                </div>
+
+                <div class="form-floating mb-3 input-with-icon">
+                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" autocomplete="current-password" required>
+                    <label for="floatingPassword">Password</label>
+                    <button type="button" class="input-icon" id="togglePwd" aria-label="Show password" title="Show password">
+                        <!-- simple SVG eye icon -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+
+                <button type="submit" class="btn btn-cta w-100 mt-2">Sign in</button>
+
+                <div class="muted-note">
+                    <small>&copy; Softpro India</small>
+                    <small><a href="/" aria-label="Back to Home">Back to Home</a></small>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.js' %}"></script>
+    <script>
+        // entrance animation
+        document.addEventListener('DOMContentLoaded', function(){
+            const card = document.getElementById('loginCard');
+            requestAnimationFrame(()=> card.classList.add('show'));
+
+            // password toggle
+            const pwd = document.getElementById('floatingPassword');
+            const toggle = document.getElementById('togglePwd');
+            if(toggle && pwd){
+                toggle.addEventListener('click', function(){
+                    const show = pwd.type === 'password';
+                    pwd.type = show ? 'text' : 'password';
+                    toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+                    // simple icon swap (toggle opacity)
+                    this.style.opacity = show ? '0.9' : '0.7';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

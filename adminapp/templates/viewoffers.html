@@ -1,0 +1,162 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block admin %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Offers</h4>
+    <a href="{% url 'addoffer' %}" class="btn btn-primary btn-sm">Create Offer</a>
+  </div>
+
+  {% for row in offers %}
+    {% with o=row.offer %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 class="mb-1">{{ o.title }}</h5>
+            <div class="small text-muted">{{ o.description }}</div>
+            <div class="small text-muted mt-1">
+              Period: {{ o.start_datetime }} — {{ o.end_datetime }}
+              {% if row.is_active_now %} <span class="badge bg-success ms-2">Active</span> {% else %}
+                {% if o.end_datetime < now %}<span class="badge bg-secondary ms-2">Expired</span>{% endif %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="text-end">
+            <div class="small text-muted">Products: {{ row.items|length }}</div>
+            <div class="mt-2">
+              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manageOfferModal{{ o.id }}">Manage</button>
+              <form method="post" action="{% url 'end_offer' o.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">End</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Current Price</th>
+                <th>Offer Price</th>
+                <th>Unlisted</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in row.items %}
+                <tr id="oi-{{ item.id }}">
+                  <td>{{ item.product.title }}</td>
+                  <td>₹{{ item.product.price }}</td>
+                  <td>₹{{ item.offer_price }}</td>
+                  <td>{% if item.unlisted %}<span class="text-danger">Yes</span>{% else %}<span class="text-success">No</span>{% endif %}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger" onclick="toggleOfferItem({{ item.id }}, '{{ item.unlisted|yesno:"relist,unlist" }}')">
+                      {% if item.unlisted %}Relist{% else %}Unlist{% endif %}
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manage Modal (edit offer / item prices) -->
+    <div class="modal fade" id="manageOfferModal{{ o.id }}" tabindex="-1" aria-labelledby="manageOfferModalLabel{{ o.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form method="post" action="{% url 'edit_offer' o.id %}">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title" id="manageOfferModalLabel{{ o.id }}">Manage Offer: {{ o.title }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row g-2 mb-3">
+                <div class="col-sm-6">
+                  <label class="form-label">Start Date</label>
+                  <input type="date" name="start_date" class="form-control" value="{{ o.start_datetime|date:'Y-m-d' }}">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label">Start Time</label>
+                  <input type="time" name="start_time" class="form-control" value="{{ o.start_datetime|time:'H:i' }}">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label">End Date</label>
+                  <input type="date" name="end_date" class="form-control" value="{{ o.end_datetime|date:'Y-m-d' }}">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label">End Time</label>
+                  <input type="time" name="end_time" class="form-control" value="{{ o.end_datetime|time:'H:i' }}">
+                </div>
+              </div>
+
+              <hr>
+              <h6>Products & Offer Prices</h6>
+              <p class="small text-muted">Edit offer price for each product or remove from offer in the table below.</p>
+
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr><th>Product</th><th>Current Price</th><th>Offer Price</th><th>Unlist</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for item in row.items %}
+                      <tr>
+                        <td>{{ item.product.title }}</td>
+                        <td>₹{{ item.product.price }}</td>
+                        <td>
+                          <input type="hidden" name="product_id[]" value="{{ item.product.id }}">
+                          <input type="number" step="0.01" name="offer_price[]" class="form-control form-control-sm" value="{{ item.offer_price }}">
+                        </td>
+                        <td>
+                          {% if item.unlisted %}
+                            <span class="text-danger">Yes</span>
+                          {% else %}
+                            <span class="text-success">No</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% endwith %}
+  {% empty %}
+    <p class="text-muted">No offers yet.</p>
+  {% endfor %}
+</div>
+
+<script>
+function toggleOfferItem(pk, action) {
+  if (!confirm('Confirm action?')) return;
+  fetch("{% url 'toggle_offer_item' 0 %}".replace('/0/', '/' + pk + '/'), {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=' + encodeURIComponent(action)
+  }).then(r => r.json()).then(data => {
+    if (data && data.success) {
+      location.reload();
+    } else {
+      alert('Failed');
+    }
+  }).catch(()=> alert('Failed'));
+}
+</script>
+{% endblock %}

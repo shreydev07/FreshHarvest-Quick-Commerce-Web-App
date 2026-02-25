@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Product Details{% endblock %}
+
+{% block main %}
+<style>
+    /* Professional gradient background - matching all pages */
+    html {
+        background: linear-gradient(135deg, #ffffff 0%, #e0d2d2 15%, #c1dfc3 35%, #c8e6c9 60%, #a5d6a7 85%, #f5f5f5 100%);
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    body {
+        background: transparent;
+        min-height: 100vh;
+    }
+
+    .product-details-wrapper {
+        padding: 40px 20px;
+        overflow-x: hidden;
+    }
+
+    .product-details-card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(250,255,250,0.97));
+        border-radius: 18px;
+        box-shadow: 0 12px 40px rgba(18,66,26,0.1);
+        border: 1px solid rgba(40,167,69,0.08);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+
+    .product-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 32px;
+        padding: 28px;
+    }
+
+    .product-image-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f5f5f5, #e9f5e9);
+        border-radius: 14px;
+        padding: 20px;
+        min-height: 350px;
+    }
+
+    .product-image-section img {
+        border-radius: 10px;
+        max-height: 320px;
+        width: auto;
+        object-fit: contain;
+        max-width: 100%;
+    }
+
+    .product-details-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .product-status {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #28a745;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+
+    .product-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #1b5e20;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+
+    .product-category {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .product-description {
+        font-size: 0.95rem;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+
+    /* Price section */
+    .price-display {
+        background: linear-gradient(135deg, rgba(46,125,50,0.05), rgba(40,167,69,0.08));
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(40,167,69,0.1);
+    }
+
+    .final-price {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #1b5e20;
+        margin: 0;
+    }
+
+    .price-note {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 6px;
+    }
+
+    /* Quantity section */
+    .quantity-controls {
+        margin-bottom: 20px;
+    }
+
+    .quantity-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1b5e20;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    #subunit-buttons {
+        margin-bottom: 14px;
+    }
+
+    .subunit-choice {
+        border: 1.5px solid rgba(40,167,69,0.3);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-weight: 600;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .subunit-choice:hover {
+        border-color: #28a745;
+        background: rgba(40,167,69,0.08);
+    }
+
+    .subunit-choice.active {
+        background: linear-gradient(90deg, #2e7d32, #28a745);
+        color: #fff;
+        border-color: #28a745;
+        box-shadow: 0 4px 12px rgba(40,167,69,0.2);
+    }
+
+    #kg-controls {
+        background: rgba(233,246,236,0.4);
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(40,167,69,0.15);
+        gap: 10px;
+    }
+
+    #kg-controls button {
+        background: rgba(40,167,69,0.1);
+        color: #28a745;
+        border: 1px solid rgba(40,167,69,0.3);
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+    }
+
+    #kg-controls button:hover {
+        background: rgba(40,167,69,0.2);
+        border-color: #28a745;
+    }
+
+    .quantity-input {
+        width: 70px;
+        border-radius: 6px;
+        border: 1px solid rgba(40,167,69,0.2);
+        padding: 6px;
+        text-align: center;
+        font-weight: 600;
+        background: #fff;
+        font-size: 0.9rem;
+    }
+
+    #unit-label {
+        color: #666;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .action-buttons button {
+        flex: 1;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-success {
+        background: linear-gradient(90deg, #2e7d32, #28a745);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(40,167,69,0.15);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(40,167,69,0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #1976d2, #1565c0);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(25,118,210,0.15);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25,118,210,0.25);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .product-details-wrapper {
+            padding: 20px 12px;
+        }
+
+        .product-detail-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-image-section {
+            min-height: 280px;
+            padding: 16px;
+        }
+
+        .product-image-section img {
+            max-height: 250px;
+        }
+
+        .product-title {
+            font-size: 1.4rem;
+        }
+
+        .final-price {
+            font-size: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<div class="product-details-wrapper">
+    <div class="container" style="max-width: 900px;">
+        <div class="product-details-card">
+            <div class="product-detail-grid">
+                <!-- Product Image Section -->
+                <div class="product-image-section">
+                    <img src="{{ product.cover_image.url }}" alt="{{ product.title }}">
+                </div>
+
+                <!-- Product Details Section -->
+                <div class="product-details-section">
+                    <p class="product-status">✓ In Stock</p>
+                    <h1 class="product-title">{{ product.title }}</h1>
+                    <p class="product-category">{{ product.category.name }}</p>
+                    <p class="product-description">{{ product.description }}</p>
+
+                    <!-- Price Section -->
+                    <div class="price-display">
+                        <div class="final-price" id="display-price">₹0.00</div>
+                        <div class="price-note" id="price-note"></div>
+                    </div>
+
+                    <!-- Quantity Selection -->
+                    <div class="quantity-controls">
+                        <label class="quantity-label">Select Quantity</label>
+                        <div id="subunit-buttons" class="d-flex flex-wrap gap-2 mb-3">
+                            <!-- Show the product's base unit button (dynamic) -->
+                            <button type="button" class="subunit-choice active"
+                                    data-variant="" data-factor="{{ product.unit.factor_to_base|default:'1' }}" data-price="">
+                                {{ product.unit.name|default:"unit" }}
+                            </button>
+
+                            <!-- product-specific subunits (admin-added) only for this product -->
+                            {% for v in product.subquantities.all %}
+                              <button type="button"
+                                      class="subunit-choice"
+                                      data-variant="{{ v.id }}"
+                                      data-factor="{{ v.factor_to_base }}"
+                                      data-price="{{ v.price|default_if_none:'' }}">
+                                {{ v.name }}
+                              </button>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Controls for base-unit (only visible when base selected) -->
+                        <div id="kg-controls" class="d-flex align-items-center">
+                            <button type="button" id="qty-decr">−</button>
+                            <input id="quantity-display" class="quantity-input" value="1" readonly>
+                            <button type="button" id="qty-incr">+</button>
+                            <div id="unit-label">{{ product.unit.name|default:"unit" }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Add to cart form -->
+                    <form method="post" action="{% url 'addtocart' product.id %}" class="action-buttons">
+                        {% csrf_token %}
+                        <input type="hidden" id="quantity-hidden" name="quantity" value="1">
+                        <input type="hidden" id="variant-hidden" name="variant" value="">
+                        <input type="hidden" id="line-total-hidden" name="line_total" value="">
+                        <button type="submit" class="btn-success">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button type="submit" name="buy_now" value="1" class="btn-primary">
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const basePrice = parseFloat("{{ effective_price|default:product.price }}") || 0;
+  const unitName = "{{ product.unit.name|default:'unit' }}";
+
+  const subButtons = Array.from(document.querySelectorAll('.subunit-choice'));
+  const kgControls = document.getElementById('kg-controls');
+  const qtyDisplay = document.getElementById('quantity-display');
+  const qtyHidden = document.getElementById('quantity-hidden');
+  const variantHidden = document.getElementById('variant-hidden');
+  const lineTotalHidden = document.getElementById('line-total-hidden');
+  const priceEl = document.getElementById('display-price');
+
+  let mode = 'base';
+  let baseQty = 1;
+  const step = 1;
+
+  function formatCurrency(v){ return '₹' + parseFloat(v || 0).toFixed(2); }
+
+  function calcAndShowPrice(){
+    const active = document.querySelector('.subunit-choice.active');
+    if (!active) return;
+    const factor = parseFloat(active.dataset.factor || '1');
+    const variantPriceRaw = active.dataset.price;
+    if (factor === 1 && active.dataset.variant === "") {
+      mode = 'base';
+      kgControls.style.display = 'flex';
+      const total = basePrice * parseFloat(baseQty || 0);
+      priceEl.textContent = formatCurrency(total) + ' / ' + unitName;
+      qtyDisplay.value = (Math.round(baseQty * 1000) / 1000).toString();
+      qtyHidden.value = (Math.round(baseQty * 1000) / 1000).toString();
+      variantHidden.value = '';
+      lineTotalHidden.value = total.toFixed(2);
+    } else {
+      mode = 'sub';
+      kgControls.style.display = 'none';
+      const curBase = parseFloat(qtyHidden.value || factor || factor);
+      qtyHidden.value = (Math.round(curBase * 1000) / 1000).toString();
+      variantHidden.value = active.dataset.variant || '';
+      let pricePerSub = (variantPriceRaw && variantPriceRaw !== '') ? parseFloat(variantPriceRaw) : (basePrice * factor);
+      const baseQtyNum = parseFloat(qtyHidden.value || factor);
+      const countSubunits = factor > 0 ? (baseQtyNum / factor) : 0;
+      const total = pricePerSub * countSubunits;
+      priceEl.textContent = formatCurrency(total) + ' — ' + (Math.round(baseQtyNum * 1000) / 1000) + ' ' + unitName + ' (' + countSubunits + ' × ' + active.textContent.trim() + ')';
+      qtyDisplay.value = (Math.round(baseQtyNum * 1000) / 1000).toString();
+      lineTotalHidden.value = total.toFixed(2);
+    }
+  }
+
+  subButtons.forEach(btn => {
+    btn.addEventListener('click', function(){
+      subButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      const factor = parseFloat(this.dataset.factor || '1');
+      const variantId = this.dataset.variant || '';
+
+      if (factor === 1 && !variantId){
+        mode = 'base';
+        kgControls.style.display = 'flex';
+        qtyHidden.value = (Math.round(baseQty * 1000) / 1000).toString();
+        variantHidden.value = '';
+      } else {
+        mode = 'sub';
+        kgControls.style.display = 'none';
+        qtyHidden.value = (Math.round(factor * 1000) / 1000).toString();
+        variantHidden.value = variantId;
+      }
+      calcAndShowPrice();
+    });
+  });
+
+  document.getElementById('qty-incr').addEventListener('click', function(){
+    if (mode !== 'base') return;
+    baseQty = (baseQty + step);
+    calcAndShowPrice();
+  });
+  document.getElementById('qty-decr').addEventListener('click', function(){
+    if (mode !== 'base') return;
+    baseQty = Math.max(step, baseQty - step);
+    calcAndShowPrice();
+  });
+
+  kgControls.style.display = 'flex';
+  qtyHidden.value = '1';
+  variantHidden.value = '';
+  lineTotalHidden.value = '';
+  calcAndShowPrice();
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,657 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<!-- [Head] start -->
+
+<head>
+  <title>Admin Dashboard</title>
+  <!-- [Meta] -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+  <!-- [Favicon] icon -->
+  <link rel="icon" href="" type="image/x-icon">
+
+  <!-- data tables css -->
+  <link rel="stylesheet" href="{% static 'admin/assets/css/plugins/dataTables.bootstrap5.min.css' %}">
+  <!-- [Google Font] Family -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    id="main-font-link">
+  <!-- [Tabler Icons] https://tablericons.com -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/tabler-icons.min.css' %}">
+  <!-- [Feather Icons] https://feathericons.com -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/feather.css' %}">
+  <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/fontawesome.css' %}">
+  <!-- [Material Icons] https://fonts.google.com/icons -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/material.css' %}">
+  <!-- [Template CSS Files] -->
+  <link rel="stylesheet" href="{% static 'admin/assets/css/style.css' %}" id="main-style-link">
+  <link rel="stylesheet" href="{% static 'admin/assets/css/style-preset.css' %}">
+
+  <style>
+    /* make topbar notification buttons uniform and match outline/width of other topbar buttons */
+    .admin-top-btn {
+      /* match bootstrap outline button sizing and border so it looks identical to other notification buttons */
+      min-width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.375rem 0.5rem;
+      border-radius: 6px;
+      /* allow Bootstrap's btn-outline-* classes to provide the border/background */
+      background: transparent;
+    }
+    .admin-top-btn i {
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+      color: inherit;
+    }
+    /* explicit red color for stock/alert icon */
+    .admin-top-btn .stock-alert-icon {
+      color: #dc3545; /* bootstrap danger */
+    }
+    /* ensure badges align consistently and same size */
+    .topbar-badge {
+      font-size: 10px;
+      line-height: 1;
+      top: 6px;
+      right: 6px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* new: consistent spacing between topbar buttons */
+    .topbar-btn {
+      margin-right: 8px;
+    }
+  </style>
+
+</head>
+<!-- [Head] end -->
+<!-- [Body] Start -->
+
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+  <!-- [ Pre-loader ] start -->
+  <div class="loader-bg">
+    <div class="loader-track">
+      <div class="loader-fill"></div>
+    </div>
+  </div>
+  <!-- [ Pre-loader ] End -->
+  <!-- [ Sidebar Menu ] start -->
+  <nav class="pc-sidebar">
+    <div class="navbar-wrapper">
+      <div class="m-header">
+        <a href="{% url 'index' %}" class="b-brand text-primary">
+          <!-- ========   Change your logo from here   ============ -->
+          <i class="fas fa-solid fa-seedling"></i>
+
+          Fresh Harvest
+        </a>
+      </div>
+      <div class="navbar-content">
+        <ul class="pc-navbar">
+          <li class="pc-item">
+            <a href="{% url 'admindash' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+              <span class="pc-mtext">Dashboard</span>
+            </a>
+          </li>
+
+          <li class="pc-item pc-caption">
+            <label>Manage</label>
+            <i class="ti ti-dashboard"></i>
+          </li>
+
+          <!-- Categrories -->
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
+              <span class="pc-mtext">Categories</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="{% url 'addcat' %}">Add Category</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'viewcat' %}">View Categories</a></li>
+            </ul>
+          </li>
+
+
+           <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
+              <span class="pc-mtext">Product Units</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="{% url 'addunit' %}">Add Units</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'viewunit' %}">View Units</a></li>
+            </ul>
+          </li>
+
+
+
+          <!-- Books -->
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-plant"></i></span>
+              <span class="pc-mtext">Products</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="{% url 'addproduct' %}">Add Products</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'viewproduct' %}">View Products</a></li>
+            </ul>
+          </li>
+
+
+
+          <!-- offer zone -->
+           <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-gift"></i></span>
+              <span class="pc-mtext">Offer Zone</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="{% url 'addoffer' %}">Add Offer</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'viewoffers' %}">View Offers</a></li>
+            </ul>
+          </li>
+          <!-- offer zone end-->
+
+
+
+            <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-truck"></i></span>
+              <span class="pc-mtext">Orders</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="{% url 'adminorders' %}">All Orders</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'transitorders' %}">Order in Transit</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'dispatchedorders' %}">Dispatched Orders</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'cancelledorders' %}">Cancelled Orders</a></li>
+              <li class="pc-item"><a class="pc-link" href="{% url 'deliveredorders' %}">Delivered Orders</a></li>
+            </ul>
+          </li>
+
+           <!-- stock management -->
+           <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-archive"></i></span>
+              <span class="pc-mtext">Stocks</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+
+              <li class="pc-item"><a class="pc-link" href="{% url 'checkstock' %}">Check Stock</a></li>
+
+            </ul>
+          </li>
+
+
+
+          <!-- income calculation -->
+
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-wallet"></i></span>
+              <span class="pc-mtext">Total Income</span><span class="pc-arrow"><i
+                  data-feather="chevron-right"></i></span>
+            </a>
+            <ul class="pc-submenu">
+              <li class="pc-item"><a class="pc-link" href="{% url 'total_income' %}">Income Report</a></li>
+
+            </ul>
+          </li>
+          <!-- income calculation end -->
+
+
+
+
+          
+
+          <li class="pc-item">
+            <a href="{% url 'viewenq' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-message-circle"></i></span>
+              <span class="pc-mtext">Enquiries</span>
+            </a>
+          </li>
+
+
+          <li class="pc-item">
+            <a href="{% url 'view_subscribed' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-message-circle"></i></span>
+              <span class="pc-mtext">View Subscribers</span>
+            </a>
+          </li>
+          
+
+
+          
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+  <!-- [ Sidebar Menu ] end --> <!-- [ Header Topbar ] start -->
+  <header class="pc-header">
+    <div class="header-wrapper"> <!-- [Mobile Media Block] start -->
+      <div class="me-auto pc-mob-drp">
+        <ul class="list-unstyled">
+          <!-- ======= Menu collapse Icon ===== -->
+          <li class="pc-h-item pc-sidebar-collapse">
+            <a href="#" class="pc-head-link ms-0" id="sidebar-hide">
+              <i class="ti ti-menu-2"></i>
+            </a>
+          </li>
+          <li class="pc-h-item pc-sidebar-popup">
+            <a href="#" class="pc-head-link ms-0" id="mobile-collapse">
+              <i class="ti ti-menu-2"></i>
+            </a>
+          </li>
+          <li class="dropdown pc-h-item d-inline-flex d-md-none">
+            <a class="pc-head-link dropdown-toggle arrow-none m-0" data-bs-toggle="dropdown" href="#" role="button"
+              aria-haspopup="false" aria-expanded="false">
+              <i class="ti ti-search"></i>
+            </a>
+            <div class="dropdown-menu pc-h-dropdown drp-search">
+              <form class="px-3">
+                <div class="form-group mb-0 d-flex align-items-center">
+                  <i data-feather="search"></i>
+                  <input type="search" class="form-control border-0 shadow-none" placeholder="Search here. . .">
+                </div>
+              </form>
+            </div>
+          </li>
+          <li class="pc-h-item d-none d-md-inline-flex">
+            <form class="header-search">
+              <i data-feather="search" class="icon-search"></i>
+              <input type="search" class="form-control" placeholder="Search here. . .">
+            </form>
+          </li>
+        </ul>
+      </div>
+      <!-- [Mobile Media Block end] -->
+      <div class="ms-auto">
+        <ul class="list-unstyled">
+          
+          <!-- Notification badge button -->
+          <li class="pc-h-item d-inline-block mt-4 me-2">
+            <!-- Make order icon use same visual style as other notification buttons -->
+            <button id="admin-notif-btn" type="button" class="btn btn-outline-secondary position-relative admin-top-btn topbar-btn" data-bs-toggle="modal" data-bs-target="#recentOrdersModal" title="Recent orders">
+              <i class="ti ti-box"></i>
+              <span id="admin-notif-badge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle topbar-badge">
+                0
+              </span>
+            </button>
+          </li>
+
+          <!-- ALERT ICON + BADGE -->
+          <li class="pc-h-item d-inline-block mt-4 me-2">
+            <!-- use same classes so size/outline/margins match the orders icon -->
+            <button id="stock-alert-toggle" class="btn btn-outline-secondary position-relative admin-top-btn topbar-btn" type="button" data-bs-toggle="modal" data-bs-target="#stockAlertModal" title="Stock alerts">
+              <i class="ti ti-bell"></i>
+              <span id="stock-alert-count" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle topbar-badge" style="display:none;"></span>
+            </button>
+          </li>
+
+          <li class="dropdown pc-h-item header-user-profile">
+            <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button"
+              aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
+              <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="user-image" class="user-avtar">
+              <span>Admin</span>
+            </a>
+            <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
+              <div class="dropdown-header">
+                <div class="d-flex mb-1">
+                  <div class="flex-shrink-0">
+                    <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="user-image"
+                      class="user-avtar wid-35">
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-1">Admin</h6>
+                    <span>{{adminid}}</span>
+                  </div>
+                  <!-- LOGOUT -->
+                  <a href="{% url 'adminlogout' %}" class="pc-head-link bg-transparent"><i class="ti ti-power text-danger"></i></a>
+                </div>
+              </div>
+              
+              <div class="tab-content" id="mysrpTabContent">
+                <div class="tab-pane fade show active" id="drp-tab-1" role="tabpanel" aria-labelledby="drp-t1"
+                  tabindex="0">
+                  <a href="{% url 'adminchangepwd' %}" class="dropdown-item">
+                    <i class="ti ti-edit-circle"></i>
+                    <span>Change Password</span>
+                  </a>
+                  <a href="{% url 'adminlogout' %}" class="dropdown-item">
+                    <i class="ti ti-power"></i>
+                    <span>Logout</span>
+                  </a>
+                </div>
+                
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <!-- [ Header ] end -->
+
+  <!-- Recent Orders Modal (floating) -->
+  <div class="modal fade" id="recentOrdersModal" tabindex="-1" aria-labelledby="recentOrdersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content"> 
+        <div class="modal-header">
+          <h5 class="modal-title">Recent Orders</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>User</th>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-tbody">
+                <!-- populated by JS -->
+              </tbody>
+              
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'recentorders' %}" class="btn btn-sm btn-primary">View All</a>
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS MODAL -->
+  <div class="modal fade" id="stockAlertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Stock Alerts</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="alerts-list" class="list-group"></div>
+        </div>
+        <div class="modal-footer">
+          <a id="view-all-alerts" href="{% url 'viewalerts' %}" class="btn btn-outline-primary">View all</a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [ Main Content ] start -->
+  <div class="pc-container">
+    <div class="pc-content">
+      {% block admin %}
+
+      {% endblock %}
+    </div>
+  </div>
+  <!-- [ Main Content ] end -->
+  <footer class="pc-footer">
+    <div class="footer-wrapper container-fluid">
+      <div class="row">
+        <div class="col-sm my-1">
+          <p class="m-0"> Developed by Shreyansh Sriavstava </p>
+        </div>
+        <div class="col-auto my-1">
+          <ul class="list-inline footer-link mb-0">
+            <li class="list-inline-item"><a href="{% url 'index' %}">Home</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- [Page Specific JS] start -->
+  <script src="{% static 'admin/assets/js/plugins/apexcharts.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/pages/dashboard-default.js' %}"></script>
+  <!-- [Page Specific JS] end -->
+  <!-- Required Js -->
+  <script src="{% static 'admin/assets/js/plugins/popper.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/simplebar.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/bootstrap.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/fonts/custom-font.js' %}"></script>
+  <script src="{% static 'admin/assets/js/pcoded.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/feather.min.js' %}"></script>
+
+
+
+
+
+  <script>layout_change('light');</script>
+
+
+
+
+  <script>change_box_container('false');</script>
+
+
+
+  <script>layout_rtl_change('false');</script>
+
+
+  <script>preset_change("preset-1");</script>
+
+
+  <script>font_change("Public-Sans");</script>
+
+  <script src="{% static 'admin/assets/js/plugins/sweetalert2.all.min.js' %}"></script>
+  {% if messages %}
+    {% for message in messages %}
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.addEventListener('mouseenter', Swal.stopTimer);
+              toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+          });
+          Toast.fire({
+            icon: '{{message.tags}}',
+            title: '{{message}}'
+          });
+      </script>
+    {% endfor %}
+  {% endif %}
+
+  <!-- add script to poll and populate modal -->
+  <script>
+  (function(){
+    const badge = document.getElementById('admin-notif-badge');
+    const btn = document.getElementById('admin-notif-btn');
+    const tbody = document.getElementById('recent-orders-tbody');
+    const apiUrl = "{% url 'recent_orders_api' %}";
+    const recentOrdersUrl = "{% url 'recentorders' %}";
+
+    function updateBadgeAndPreview() {
+      fetch(apiUrl, { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          if (!data) return;
+          // update badge (API can return string like "99+" or number)
+          if (badge) badge.textContent = data.count;
+
+          // populate modal preview rows
+          if (tbody && Array.isArray(data.items)) {
+            tbody.innerHTML = '';
+
+            // show friendly empty row when no items
+            if (data.items.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="7" class="small text-muted text-center">No recent orders</td></tr>';
+            }
+
+            data.items.forEach(it => {
+              const tr = document.createElement('tr');
+              const date = new Date(it.ordered_at || it.created_at || '');
+              const dateStr = isNaN(date.getTime()) ? '' : date.toLocaleString();
+              const imgHtml = it.product_image ? `<img src="${it.product_image}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;" />` : '<div style="width:48px;height:48px;background:#f2f2f2;border-radius:6px"></div>';
+              const priceVal = (typeof it.price === 'number') ? it.price.toFixed(2) : (it.price ? String(it.price) : '0.00');
+              const totalVal = (typeof it.total === 'number') ? it.total.toFixed(2) : (it.total ? String(it.total) : '0.00');
+
+              // Robust quantity + unit rendering:
+              // API may return unit in different fields (unit, unit_name, variant.unit, unit_display, etc.)
+              const qtyVal = (typeof it.quantity !== 'undefined' && it.quantity !== null) ? it.quantity : '';
+              const unitCandidates = [
+                it.unit,
+                it.unit_name,
+                (it.variant && it.variant.unit),
+                it.unit_display,
+                it.unitLabel,
+                it.unit_label
+              ];
+              let unit = '';
+              for (let u of unitCandidates) {
+                if (u) { unit = u; break; }
+              }
+              const qtyText = (qtyVal === '' || qtyVal === null) ? '' : (String(qtyVal) + (unit ? (' ' + unit) : ''));
+
+              tr.innerHTML = `
+                <td>#${it.order_number || it.order_id || ''}</td>
+                <td>${(it.user_name || it.user_email || it.user || '')}</td>
+                <td style="min-width:180px">${imgHtml} <div style="display:inline-block;vertical-align:middle;margin-left:8px">${it.product_title || it.product_name || ''}</div></td>
+                <td>${qtyText}</td>
+                <td>₹${priceVal}</td>
+                <td>₹${totalVal}</td>
+                <td>${dateStr}</td>
+              `;
+              tr.style.cursor = 'pointer';
+              tr.setAttribute('tabindex', '0');
+              const orderId = it.order_id || '';
+              tr.dataset.href = recentOrdersUrl + '?order_id=' + encodeURIComponent(orderId);
+              tbody.appendChild(tr);
+            });
+          }
+        })
+        .catch(()=>{ /* silent - do not block page */ });
+    }
+ 
+     // add delegated click handler so each row navigates to recentorders page
+     if (tbody) {
+       tbody.addEventListener('click', function (ev) {
+         const tr = ev.target.closest('tr');
+         if (!tr) return;
+         const href = tr.dataset.href;
+         if (href) {
+           window.location.href = href;
+         }
+       });
+       // support keyboard activation (Enter key)
+       tbody.addEventListener('keydown', function (ev) {
+         if (ev.key === 'Enter') {
+           const tr = ev.target.closest('tr');
+           if (!tr) return;
+           const href = tr.dataset.href;
+           if (href) window.location.href = href;
+         }
+       });
+     }
+ 
+     // initial load
+     updateBadgeAndPreview();
+ 
+     // poll every 15 seconds
+     setInterval(updateBadgeAndPreview, 15000);
+ 
+     // refresh when admin opens modal
+     const modalEl = document.getElementById('recentOrdersModal');
+     if (modalEl) {
+       modalEl.addEventListener('show.bs.modal', function () {
+         updateBadgeAndPreview();
+       });
+     }
+   })();
+   </script>
+
+  <script>
+ (function(){
+  function refreshBadge(){
+    fetch("{% url 'low_stock_count_api' %}", { credentials:'same-origin' })
+      .then(r=> r.ok ? r.json() : Promise.resolve({count:0}))
+      .then(data=>{
+        const c = parseInt(data.count) || (typeof data.count === 'string' ? data.count : 0);
+        // correct id used in template is 'stock-alert-count'
+        const badge = document.getElementById('stock-alert-count');
+        if(!badge) return;
+        if(c && c !== 0){
+          badge.style.display = 'inline-block';
+          badge.innerText = (typeof c === 'number' && c > 99) ? '99+' : c;
+        } else {
+          badge.style.display = 'none';
+        }
+      }).catch(()=>{});
+  }
+  document.addEventListener('DOMContentLoaded', refreshBadge);
+  // refresh periodically
+  setInterval(refreshBadge, 5*60*1000);
+ })();
+ </script>
+
+<script>
+(function(){
+  function loadAlerts(){
+    fetch("{% url 'recent_alerts_api' %}", {credentials:'same-origin'}).then(r => r.ok ? r.json() : {count:0,items:[]}).then(data=>{
+      const c = data.count || 0;
+      const badge = document.getElementById('stock-alert-count');
+      if(!badge) return;
+      if(c > 0){ badge.style.display='inline-block'; badge.innerText = c > 99 ? '99+' : c; } else badge.style.display='none';
+
+      const list = document.getElementById('alerts-list');
+      if(!list) return;
+      list.innerHTML = '';
+      (data.items || []).forEach(it=>{
+        const el = document.createElement('a');
+        el.className = 'list-group-item list-group-item-action d-flex align-items-start';
+        el.href = `{% url 'checkstock' %}?page=${it.page}&scroll_to=${it.product_id}`;
+        el.innerHTML = `<div class="me-3"><strong>${it.product_title}</strong><div class="small text-muted">${it.message}</div></div><div class="ms-auto small text-muted">${new Date(it.created_at).toLocaleString()}</div>`;
+        list.appendChild(el);
+      });
+      if((data.items || []).length === 0){
+        list.innerHTML = '<div class="list-group-item small text-muted">No alerts</div>';
+      }
+    }).catch(()=>{});
+  }
+  document.addEventListener('DOMContentLoaded', loadAlerts);
+  // refresh periodically
+  setInterval(loadAlerts, 5*60*1000);
+})();
+</script>
+</body>
+<!-- [Body] end -->
+
+</html>

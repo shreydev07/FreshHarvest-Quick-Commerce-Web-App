@@ -1,0 +1,145 @@
+{% extends 'userbase.html' %}
+{% load static %}
+{% block user %}
+<style>
+  .edit-wrap { max-width:1000px; margin:18px auto; }
+  .card-edit { background:#fff; border-radius:12px; box-shadow:0 8px 28px rgba(8,34,20,0.06); overflow:hidden; }
+  .card-head { background:linear-gradient(90deg, rgba(16,185,129,0.06), rgba(34,197,94,0.03)); padding:18px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .avatar-lg { width:96px; height:96px; border-radius:10px; object-fit:cover; background:#f3f4f6; border:2px solid rgba(16,185,129,0.12); }
+  .head-title { font-weight:700; font-size:1.15rem; color:#08331f; margin:0; }
+  .head-sub { color:#6b7280; margin:0; font-size:0.95rem; }
+
+  .card-body { padding:22px; display:grid; grid-template-columns: 1fr 360px; gap:22px; }
+  @media (max-width:991px){ .card-body { grid-template-columns: 1fr; } }
+
+  .form-label { font-weight:600; color:#374151; }
+  .preview-box { display:flex; flex-direction:column; gap:12px; align-items:center; padding:14px; border-radius:8px; background:#f8fffa; border:1px dashed rgba(34,197,94,0.06); }
+  .preview-box .hint { color:#065f46; font-size:0.9rem; }
+  .btn-row { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+
+  .small-muted { color:#6b7280; font-size:0.9rem; }
+
+  /* file input reset */
+  input[type="file"] { padding:6px 0; }
+</style>
+
+<div class="edit-wrap">
+  <div class="card-edit">
+    <div class="card-head">
+      <div>
+        {% if user.profile %}
+          <img id="currentAvatar" src="{{ user.profile.url }}" alt="avatar" class="avatar-lg">
+        {% else %}
+          <img id="currentAvatar" src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="avatar" class="avatar-lg">
+        {% endif %}
+      </div>
+      <div style="flex:1;">
+        <h3 class="head-title">Edit Profile</h3>
+        <p class="head-sub">Update your contact info and profile picture. Changes are saved instantly after you press Save.</p>
+      </div>
+      <div style="margin-left:auto;">
+        <a href="{% url 'userprofile' %}" class="btn btn-outline-secondary btn-sm">Back to Profile</a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div>
+        <form method="post" enctype="multipart/form-data" id="editProfileForm" class="row g-3">
+          {% csrf_token %}
+          <div class="col-12 col-md-6">
+            <label for="n" class="form-label">Full name</label>
+            <input id="n" name="name" type="text" class="form-control" value="{{ user.name|default:'' }}" />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="cn" class="form-label">Contact number</label>
+            <input id="cn" name="contactno" type="text" class="form-control" value="{{ user.contactno|default:'' }}" />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="em" class="form-label">Email</label>
+            <input id="em" name="email" type="email" class="form-control" value="{{ user.email|default:'' }}" disabled />
+            <div class="small-muted mt-1">Email cannot be changed here. Contact support to update email.</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="pic" class="form-label">Upload profile photo</label>
+            <input id="pic" name="profile" type="file" accept="image/*" class="form-control" />
+            <div class="small-muted mt-1">Supported: JPG, PNG. Max recommended size 2MB.</div>
+          </div>
+
+          <div class="col-12">
+            <label for="add" class="form-label">Address</label>
+            <textarea id="add" name="address" class="form-control" rows="3">{{ user.address|default:'' }}</textarea>
+          </div>
+
+          <div class="col-12">
+            <div class="btn-row">
+              <button type="button" onclick="window.location='{% url 'userprofile' %}';" class="btn btn-outline-secondary">Cancel</button>
+              <button type="submit" class="btn btn-success">Save changes</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <aside>
+        <div class="preview-box">
+          <div class="fw-bold">Preview</div>
+          <div style="width:220px; height:220px; border-radius:10px; overflow:hidden; background:#fff; display:flex; align-items:center; justify-content:center;">
+            <img id="previewImg" src="{% if user.profile %}{{ user.profile.url }}{% else %}{% static 'admin/assets/images/user/avatar-2.jpg' %}{% endif %}" alt="preview" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="hint small-muted text-center">This is how your profile picture will appear across the site.</div>
+          <div style="width:100%;">
+            <button id="removePicBtn" type="button" class="btn btn-outline-danger btn-sm w-100" style="display:none;">Remove selected image</button>
+          </div>
+        </div>
+
+        <div style="margin-top:18px; padding:12px; border-radius:8px; background:#fcfff7; border:1px solid rgba(16,185,129,0.06);">
+          <div class="fw-bold">Security</div>
+          <div class="small-muted mt-1">Change password from <a href="{% url 'userchangepassword' %}">here</a>.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var picInput = document.getElementById('pic');
+  var preview = document.getElementById('previewImg');
+  var removeBtn = document.getElementById('removePicBtn');
+  var currentAvatar = document.getElementById('currentAvatar');
+
+  if (!picInput) return;
+
+  picInput.addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) {
+      removeBtn.style.display = 'none';
+      return;
+    }
+    if (!f.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      picInput.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      preview.src = ev.target.result;
+      currentAvatar.src = ev.target.result;
+      removeBtn.style.display = 'block';
+    };
+    reader.readAsDataURL(f);
+  });
+
+  removeBtn.addEventListener('click', function () {
+    if (confirm('Remove this image?')) {
+      preview.src = '{% if user.profile %}{{ user.profile.url }}{% else %}{% static 'admin/assets/images/user/avatar-2.jpg' %}{% endif %}';
+      currentAvatar.src = '{% if user.profile %}{{ user.profile.url }}{% else %}{% static 'admin/assets/images/user/avatar-2.jpg' %}{% endif %}';
+      picInput.value = '';
+      removeBtn.style.display = 'none';
+    }
+  });
+});
+</script>
+{% endblock %}

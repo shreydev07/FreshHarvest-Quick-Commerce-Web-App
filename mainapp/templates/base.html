@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FreshHarvest{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'css/splide.min.css' %}"> 
+   <link rel="stylesheet" href="{% static 'css/modern.css' %}"> <!-- custom modern UI styles -->  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+  <link rel="icon" href="{% static 'img/freshHarvest.png' %}">
+
+  <style>
+    :root{ --brand:#2E7D32; --muted:#6c757d; --card-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+
+    #navbarNav ul li{
+      padding-right: 20px;
+      margin-right: 10px;
+    }
+
+    /* Layout: use column flex so footer sticks and main fills available space */
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      -webkit-font-smoothing:antialiased;
+      background: linear-gradient(135deg,#f9fff9,#e8f5e9);
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    main { flex: 1 0 auto; } /* allow main to take remaining space */
+
+    /* Navbar styles are moved to modern.css for a glassy gradient effect */
+    /* Additional utility classes defined in modern.css are used throughout the layout. */
+    /* Toggler icon default is provided by Bootstrap; modifications handled by modern.css */
+
+    /* Hero and cards */
+    .hero-section{ min-height:60vh; display:flex; align-items:center; }
+    .hero-content h1{ font-size:2.4rem; font-weight:700; color:#0b3b0b; margin:0; }
+    .hero-content p{ color:#254d2a; margin:0; }
+
+    .card{ border-radius:14px; box-shadow:var(--card-shadow); border:none; overflow:hidden; }
+    .card-img-top{ object-fit:cover; height:220px; width:100%; }
+
+    /* Footer */
+    footer{ background:linear-gradient(135deg,#2E7D32,#1B5E20); color:#fff; padding:32px 0; flex-shrink:0; }
+
+    /* Utilities */
+    .container { max-width:1180px; }
+    .muted { color:var(--muted); }
+
+    /* Responsive tweaks */
+    @media (max-width:768px){
+      .card-img-top{ height:160px; }
+      .hero-content h1{ font-size:1.6rem; }
+    }
+
+    /* Small fix: remove unexpected gaps from images/buttons */
+    img { display: block; max-width: 100%; }
+
+
+    #nav-drop{
+      background: rgba(255,255,255,0.06); backdrop-filter: blur(16px);-webkit-backdrop-filter: blur(16px); \
+    
+    }
+    #nav-drop .dropdown-item:hover{
+      background: rgba(255,255,255,0.1);
+    }
+
+  </style>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{% static 'img/freshHarvest.png' %}" alt="FreshHarvest logo">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse me-5" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
+
+          {# only show Register when no user session exists #}
+          {% if not userid %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+          {% endif %}
+
+          <li class="nav-item"><a class="nav-link" href="{% url 'products' %}">Products</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
+        </ul>
+
+        <div class="text-center me-3">
+          {% if userid %}
+            <div class="dropdown">
+              <button class="btn  dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" style="gap:8px; background: rgba(255,255,255,0.06); backdrop-filter: blur(16px);-webkit-backdrop-filter: blur(16px); ">
+                <img src="{{ profile_url|default:'/static/admin/assets/images/user/avatar-2.jpg' }}" alt="avatar" style=" width:34px;height:34px;border-radius:6px;object-fit:cover;">
+                <span>{{ username|default:name }}</span>
+              </button>
+              <ul class="dropdown-menu" id="nav-drop">
+                <li><a class="dropdown-item" href="{% url 'userdash' %}">Dashboard</a></li>
+                <li><a class="dropdown-item" href="{% url 'viewcart' %}">Cart</a></li>
+                <li><a class="dropdown-item" href="{% url 'userlogout' %}">Logout</a></li>
+              </ul>
+            </div>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-warning ">Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+ 
+
+  <!-- Main content -->
+  <main>
+    {% block main %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer role="contentinfo" aria-label="Site footer">
+    <div class="container">
+      <div class="row gy-4 align-items-start">
+        <div class="col-12 col-md-5" style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="{% static 'img/freshHarvest.png' %}" alt="FreshHarvest" style="height:46px;width:auto;object-fit:contain;border-radius:6px;">
+            <div style="font-weight:800;font-size:1.15rem;color:#eaffea;">FreshHarvest</div>
+          </div>
+
+          <p style="margin:0;color:rgba(255,255,255,0.85);max-width:520px;">
+            Farm‑fresh vegetables and fruits delivered daily — sustainably sourced, carefully packed and delivered fast to your door.
+          </p>
+
+          <div style="display:flex;gap:10px;align-items:center;margin-top:6px;">
+            <a href="#" aria-label="Facebook" style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;">
+              <i class="fab fa-facebook-f" aria-hidden="true" style="font-size:14px;"></i>
+            </a>
+            <a href="#" aria-label="Instagram" style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;">
+              <i class="fab fa-instagram" aria-hidden="true" style="font-size:14px;"></i>
+            </a>
+            <a href="#" aria-label="Twitter" style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;">
+              <i class="fab fa-twitter" aria-hidden="true" style="font-size:14px;"></i>
+            </a>
+            <a href="#" aria-label="WhatsApp" style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;">
+              <i class="fab fa-whatsapp" aria-hidden="true" style="font-size:14px;"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div style="font-weight:700;color:#eaffea;margin-bottom:10px;">Quick Links</div>
+          <ul style="list-style:none;padding:0;margin:0;line-height:2;">
+            <li><a href="#" style="color:rgba(255,255,255,0.92);text-decoration:none;">Orders</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.92);text-decoration:none;">Help</a></li>
+            <li><a href="#" style="color:rgba(255,255,255,0.92);text-decoration:none;">Pricing</a></li>
+            <li><a href="{% url 'products' %}" style="color:rgba(255,255,255,0.92);text-decoration:none;">Products</a></li>
+            <li><a href="{% url 'contact' %}" style="color:rgba(255,255,255,0.92);text-decoration:none;">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-md-4">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-weight:700;color:#eaffea;">Contact</div>
+            <div style="color:rgba(255,255,255,0.92);">shreyanshdevd@gmail.com</div>
+            <div style="color:rgba(255,255,255,0.92);">+91 7398668929</div>
+
+            <div style="margin-top:8px;">
+              <div style="font-weight:700;color:#eaffea;margin-bottom:6px;">Get Our App</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="#" aria-label="Download on Play Store" style="display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:linear-gradient(90deg,#1b8b2b,#28a745);color:#fff;text-decoration:none;font-weight:700;font-size:0.9rem;">
+                  <i class="fab fa-google-play" aria-hidden="true" style="font-size:16px;"></i> Play
+                </a>
+                <a href="#" aria-label="Download on App Store" style="display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:linear-gradient(90deg,#0d6efd,#2b8cff);color:#fff;text-decoration:none;font-weight:700;font-size:0.9rem;">
+                  <i class="fab fa-apple" aria-hidden="true" style="font-size:16px;"></i> App
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:24px;padding-top:16px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:0.85rem;color:rgba(255,255,255,0.75);text-align:center;">
+            © {{ now.year }} FreshHarvest. All Rights Reserved.
+          </div>
+          <div style="font-size:0.85rem;color:rgba(255,255,255,0.75);text-align:center;">
+            Designed & Developed by <a href="https://shreyanshdev.pythonanywhere.com/" target="_blank" class="text-decoration-none text-white">Shreyansh Sriavstava</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{% static 'js/bootstrap.bundle.js' %}"></script>
+  <script src="{% static 'js/splide.min.js' %}"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <!-- custom UI behaviour -->
+  <script src="{% static 'js/modern.js' %}"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      AOS.init({ duration: 900, once: true });
+
+      // Initialize Splide only if element exists
+      var slider = document.getElementById('featured');
+      if (slider) {
+        new Splide('#featured', {
+          type: 'loop',
+          perPage: 4,
+          autoplay: true,
+          interval: 3000,
+          breakpoints: { 1200:{perPage:3}, 768:{perPage:2}, 576:{perPage:1} }
+        }).mount();
+      }
+    });
+  </script>
+
+  {% block scripts %}{% endblock %}
+  <!-- SweetAlert2 for site-wide toasts (high z-index) -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* Ensure toast appears above other UI */
+    .swal2-container { z-index: 999999 !important; }
+  </style>
+  {% if messages %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3500,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+          }
+        });
+        {% for message in messages %}
+          Toast.fire({
+            icon: '{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}',
+            title: '{{ message|escapejs }}'
+          });
+        {% endfor %}
+      });
+    </script>
+  {% endif %}
+</body>
+</html>

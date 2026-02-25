@@ -1,0 +1,30 @@
+{% extends 'adminbase.html' %}
+{% block admin %}
+<div class="row">
+    <div class="col-sm-12">
+        <h4>Change Password</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-8 mx-auto">
+        <div class="card p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="oldpwd" class="form-label">Old Password</label>
+                    <input type="text" name="oldpwd" class="form-control" id="oldpwd"  required>
+                </div>
+                <div class="mb-3">
+                    <label for="newpwd" class="form-label">New Password</label>
+                    <input type="text" name="newpwd" class="form-control" id="newpwd"  required>
+                </div>
+                <div class="mb-3">
+                    <label for="confirmpwd" class="form-label">Confirm Password</label>
+                    <input type="text" name="confirmpwd" class="form-control" id="confirmpwd"  required>
+                </div>
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

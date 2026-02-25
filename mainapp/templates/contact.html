@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block main %}
+<style>
+  /* Professional gradient background - matching register and products page theme */
+  html {
+    background: linear-gradient(135deg, #ffffff 0%, #e0d2d2 15%, #c1dfc3 35%, #c8e6c9 60%, #a5d6a7 85%, #f5f5f5 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  body {
+    background: transparent;
+    min-height: 100vh;
+  }
+
+  .contact-hero {
+    padding: 60px 20px;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .contact-hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: #1b5e20;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .contact-hero p {
+    font-size: 1.1rem;
+    color: #555;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .contact-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px 60px 20px;
+  }
+
+  /* Contact info cards */
+  .contact-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 50px;
+  }
+
+  .info-card {
+    background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 32px rgba(18,66,26,0.08);
+    border: 1px solid rgba(40,167,69,0.06);
+    backdrop-filter: blur(8px);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .info-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(18,66,26,0.12);
+  }
+
+  .info-card-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #e9f6ec, #dff7e6);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+    color: var(--bs-success);
+  }
+
+  .info-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1b5e20;
+    margin-bottom: 8px;
+  }
+
+  .info-card p {
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* Contact form section */
+  .form-section {
+    background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px;
+    padding: 48px;
+    box-shadow: 0 16px 48px rgba(18,66,26,0.1);
+    border: 1px solid rgba(40,167,69,0.08);
+    backdrop-filter: blur(10px);
+  }
+
+  .form-section h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1b5e20;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .form-section > p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(40,167,69,0.15);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.8);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    font-family: inherit;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #28a745;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(40,167,69,0.1);
+  }
+
+  .form-control::placeholder {
+    color: #aaa;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .form-row .form-group {
+    margin-bottom: 0;
+  }
+
+  .btn-submit {
+    background: linear-gradient(90deg, #2e7d32, #28a745);
+    color: #fff;
+    border: none;
+    padding: 14px 42px;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 16px rgba(40,167,69,0.2);
+    min-width: 180px;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(40,167,69,0.3);
+  }
+
+  .btn-submit:active {
+    transform: translateY(-1px);
+  }
+
+  .alert {
+    border-radius: 12px;
+    border: 1px solid rgba(40,167,69,0.2);
+    margin-bottom: 24px;
+    backdrop-filter: blur(8px);
+  }
+
+  .alert-success {
+    background: rgba(200,230,201,0.5);
+    color: #1b5e20;
+  }
+
+  @media (max-width: 768px) {
+    .contact-hero {
+      padding: 40px 16px;
+      margin-bottom: 30px;
+    }
+
+    .contact-hero h1 {
+      font-size: 2rem;
+    }
+
+    .form-section {
+      padding: 32px 20px;
+      border-radius: 16px;
+    }
+
+    .form-section h2 {
+      font-size: 1.6rem;
+    }
+
+    .info-card {
+      padding: 24px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px 24px;
+    }
+  }
+</style>
+
+<!-- Hero Section -->
+<div class="contact-hero">
+  <h1>Get in Touch</h1>
+  <p>We'd love to hear from you. Have a question or feedback? Drop us a message and we'll get back to you within 24 hours.</p>
+</div>
+
+<!-- Contact Info Cards -->
+<div class="contact-container">
+  <div class="contact-info-grid">
+    <div class="info-card">
+      <div class="info-card-icon">
+        <i class="fas fa-envelope"></i>
+      </div>
+      <h3>Email</h3>
+      <p>shreyanshdevd@gmail.com</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">
+        <i class="fas fa-phone"></i>
+      </div>
+      <h3>Phone</h3>
+      <p>+91 7398668929</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">
+        <i class="fas fa-map-marker-alt"></i>
+      </div>
+      <h3>Location</h3>
+      <p>Fresh Market Hub, Lucknow, India</p>
+    </div>
+  </div>
+
+  <!-- Contact Form -->
+  <div class="form-section">
+    {% if messages %}
+      {% for m in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ m }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <h2>Send us a Message</h2>
+    <p>Fill out the form below and we'll respond as soon as possible.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name" class="form-label">Full Name</label>
+          <input type="text" name="name" id="name" class="form-control" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contactno" class="form-label">Phone Number</label>
+          <input type="tel" name="contactno" id="contactno" class="form-control" placeholder="+91 9XXXXXXXXX">
+        </div>
+
+        <div class="form-group">
+          <label for="subject" class="form-label">Subject</label>
+          <input type="text" name="subject" id="subject" class="form-control" placeholder="How can we help?">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="messages" class="form-label">Message</label>
+        <textarea name="message" id="messages" class="form-control" placeholder="Write your message here..." required></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-start;">
+        <button type="submit" class="btn-submit">Send Message</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

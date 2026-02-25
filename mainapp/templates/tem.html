@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block main %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fresh Veggies Mart</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- AOS Animation -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fdf5;
+      overflow-x: hidden;
+    }
+    /* Hero */
+    .hero {
+      /* background: url('static/') no-repeat center center/cover; */
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      position: relative;
+    }
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(215, 219, 215);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 2s ease;
+    }
+    .search-box {
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .search-box input {
+      border-radius: 30px 0 0 30px;
+      border: none;
+      padding: 15px;
+    }
+    .search-box button {
+      border-radius: 0 30px 30px 0;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      padding: 0 25px;
+      transition: 0.3s;
+    }
+    .search-box button:hover {
+      background-color: #218838;
+      transform: scale(1.05);
+    }
+    /* Section backgrounds */
+    .section-green { background-color: #e9f9ee; }
+    .section-yellow { background-color: #fff9e6; }
+    .section-gray { background-color: #f8f9fa; }
+    .section-gradient { background: linear-gradient(135deg, #a8e063, #56ab2f); color: white; }
+    /* Card hover */
+    .card {
+      transition: all 0.4s ease;
+    }
+    .card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
+    }
+    /* How it works arrows */
+    .how-it-works-step {
+      position: relative;
+    }
+    .how-it-works-step::after {
+      content: "\f138";
+      font-family: "bootstrap-icons";
+      position: absolute;
+      right: -40px;
+      top: 40%;
+      font-size: 2rem;
+      color: #28a745;
+    }
+    .how-it-works-step:last-child::after {
+      display: none;
+    }
+    /* About Us */
+    .about-img {
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    /* Newsletter */
+    .newsletter input {
+      border-radius: 30px 0 0 30px;
+      padding: 15px;
+      border: none;
+    }
+    .newsletter button {
+      border-radius: 0 30px 30px 0;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0 25px;
+    }
+  </style>
+</head>
+<body>
+  
+<!-- Hero Section -->
+<section class="hero" style="background-image: url('{% static 'img/sl1.png' %}'); background-size: cover; background-position: center;">
+  <div class="hero-overlay"></div>
+  <div class="hero-content" data-aos="fade-up">
+    <h1 class="display-3 fw-bold">Farm-Fresh Vegetables Delivered</h1>
+    <p class="lead">From our fields to your doorstep, 100% natural & organic</p>
+    <div class="search-box d-flex mx-auto" style="max-width:600px;">
+      <input type="text" class="form-control" placeholder="Search Vegetables, Fruits, Groceries...">
+      <button><i class="bi bi-search"></i></button>
+    </div>
+    <a href="#categories" class="btn btn-lg btn-success rounded-pill mt-4 shadow">Shop Now</a>
+  </div>
+</section>
+
+
+  <!-- 🌿 Categories Section -->
+  <section id="categories" class="py-5 section-green">
+    <div class="container">
+      <div class="text-center mb-5" data-aos="zoom-in">
+        <h2 class="fw-bold">Shop by Categories</h2>
+        <p class="text-muted">Choose from our fresh and organic collections</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4 col-lg-3" data-aos="fade-up">
+          <div class="card shadow-sm border-0 h-100 text-center p-3">
+            <i class="bi bi-basket2-fill text-success display-4 mb-3"></i>
+            <h5 class="fw-bold">Vegetables</h5>
+            <p class="text-muted">Fresh farm vegetables for your daily meals</p>
+            <a href="#" class="btn btn-outline-success btn-sm">Shop Now</a>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+          <div class="card shadow-sm border-0 h-100 text-center p-3">
+            <i class="bi bi-apple text-danger display-4 mb-3"></i>
+            <h5 class="fw-bold">Fruits</h5>
+            <p class="text-muted">Juicy and seasonal fruits delivered fresh</p>
+            <a href="#" class="btn btn-outline-success btn-sm">Shop Now</a>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+          <div class="card shadow-sm border-0 h-100 text-center p-3">
+            <i class="bi bi-leaf-fill text-success display-4 mb-3"></i>
+            <h5 class="fw-bold">Organic</h5>
+            <p class="text-muted">100% organic products directly from farms</p>
+            <a href="#" class="btn btn-outline-success btn-sm">Shop Now</a>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="card shadow-sm border-0 h-100 text-center p-3">
+            <i class="bi bi-cup-straw text-warning display-4 mb-3"></i>
+            <h5 class="fw-bold">Dairy</h5>
+            <p class="text-muted">Milk, curd, paneer & more, fresh and pure</p>
+            <a href="#" class="btn btn-outline-success btn-sm">Shop Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🥗 How It Works Section -->
+  <section id="how-it-works" class="py-5 section-gray">
+    <div class="container">
+      <div class="text-center mb-5" data-aos="zoom-in">
+        <h2 class="fw-bold">How It Works</h2>
+        <p class="text-muted">Ordering fresh vegetables online is as easy as 1, 2, 3!</p>
+      </div>
+      <div class="row text-center justify-content-center">
+        <div class="col-md-3 how-it-works-step" data-aos="fade-up">
+          <div class="card border-0 shadow-sm p-4 h-100">
+            <i class="bi bi-search text-success display-4 mb-3"></i>
+            <h5 class="fw-bold">1. Browse Products</h5>
+            <p class="text-muted">Explore a wide range of fresh vegetables, fruits, and groceries.</p>
+          </div>
+        </div>
+        <div class="col-md-3 how-it-works-step" data-aos="fade-up" data-aos-delay="150">
+          <div class="card border-0 shadow-sm p-4 h-100">
+            <i class="bi bi-cart-check-fill text-primary display-4 mb-3"></i>
+            <h5 class="fw-bold">2. Add to Cart & Checkout</h5>
+            <p class="text-muted">Securely place your order with easy payment options.</p>
+          </div>
+        </div>
+        <div class="col-md-3 how-it-works-step" data-aos="fade-up" data-aos-delay="300">
+          <div class="card border-0 shadow-sm p-4 h-100">
+            <i class="bi bi-truck text-warning display-4 mb-3"></i>
+            <h5 class="fw-bold">3. Fast Delivery</h5>
+            <p class="text-muted">Sit back & relax, we’ll deliver fresh veggies to your door.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🌍 About Us Section -->
+  <section class="py-5 section-gradient">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6 about-img" data-aos="fade-right">
+          <img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=80" class="img-fluid" alt="Farm">
+        </div>
+        <div class="col-md-6" data-aos="fade-left">
+          <h2 class="fw-bold mb-4">About Fresh Veggies Mart</h2>
+          <p>We believe in bringing you the freshest, most vibrant, and organic farm produce straight to your home. Our farmers work tirelessly to ensure every bite is pure, chemical-free, and delicious.</p>
+          <ul class="list-unstyled mt-3">
+            <li><i class="bi bi-check-circle-fill text-light me-2"></i> 100% Organic & Natural</li>
+            <li><i class="bi bi-check-circle-fill text-light me-2"></i> Direct from Farm to Home</li>
+            <li><i class="bi bi-check-circle-fill text-light me-2"></i> Eco-friendly & Sustainable</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🌟 Testimonials -->
+  <section class="py-5 section-yellow">
+    <div class="container">
+      <div class="text-center mb-5" data-aos="zoom-in">
+        <h2 class="fw-bold">What Our Customers Say</h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4" data-aos="fade-up">
+          <div class="card shadow-sm p-4 h-100">
+            <p>"Absolutely love the freshness! My kids are finally eating veggies happily."</p>
+            <h6 class="fw-bold mt-3">- Priya Sharma</h6>
+          </div>
+        </div>
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+          <div class="card shadow-sm p-4 h-100">
+            <p>"Delivery is always on time, and the produce is better than the supermarket."</p>
+            <h6 class="fw-bold mt-3">- Rohan Mehta</h6>
+          </div>
+        </div>
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+          <div class="card shadow-sm p-4 h-100">
+            <p>"Great service and amazing organic fruits. Highly recommended!"</p>
+            <h6 class="fw-bold mt-3">- Anjali Verma</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✉️ Newsletter -->
+  <section class="py-5 section-green newsletter text-center">
+    <div class="container" data-aos="fade-up">
+      <h2 class="fw-bold mb-3">Subscribe to Our Newsletter</h2>
+      <p class="mb-4 text-muted">Get updates on fresh arrivals and special offers</p>
+      <div class="d-flex justify-content-center">
+        <input type="email" class="form-control w-50" placeholder="Enter your email">
+        <button>Subscribe</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bootstrap JS + AOS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 1200,
+      once: true
+    });
+  </script>
+</body>
+</html>
+{% endblock %}

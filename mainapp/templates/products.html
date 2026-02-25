@@ -1,0 +1,436 @@
+{% extends 'base.html' %} 
+{% load static offer_tags %}
+{% block main %}
+<style>
+  /* Professional gradient background - matching register page theme */
+  html {
+    background: linear-gradient(135deg, #ffffff 0%, #e0d2d2 15%, #c1dfc3 35%, #c8e6c9 60%, #a5d6a7 85%, #f5f5f5 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  body {
+    background: transparent;
+    min-height: 100vh;
+  }
+  .splide__slide {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+  }
+  .product-card-modern {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    border: none;
+    width: 300px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+    min-height: 340px;
+    max-height: 370px;
+    overflow: hidden;
+  }
+  .product-card-modern:hover {
+    box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.18);
+    transform: translateY(-6px) scale(1.02);
+  }
+  .product-card-modern .product-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    background: #f4f4f4;
+  }
+  .product-card-modern .card-body {
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .product-card-modern .product-title {
+    font-weight: 700;
+    font-size: 1.08rem;
+    margin-bottom: 0.3rem;
+    color: #222;
+    text-align: left;
+    width: 100%;
+  }
+  .product-card-modern .product-desc {
+    font-size: 0.97rem;
+    color: #888;
+    margin-bottom: 0.7rem;
+    text-align: left;
+    width: 100%;
+    min-height: 32px;
+  }
+  .product-card-modern .product-price-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 0.7rem;
+  }
+  .product-card-modern .product-price {
+    color: #222;
+    font-weight: 700;
+    font-size: 1.18rem;
+  }
+  .product-card-modern .product-old-price {
+    color: #aaa;
+    text-decoration: line-through;
+    margin-left: 0.7rem;
+    font-size: 1rem;
+  }
+  .product-card-modern .button-row {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.3rem;
+  }
+  .product-card-modern .add-to-cart-btn {
+    flex: 1;
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 30px;
+    padding: 0.6rem 0;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(67, 233, 123, 0.08);
+  }
+  .product-card-modern .add-to-cart-btn:hover {
+    background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+  }
+  .product-card-modern .buy-now-btn {
+    flex: 1;
+    background: #27ae60;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 30px;
+    padding: 0.6rem 0;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.08);
+  }
+  .product-card-modern .buy-now-btn:hover {
+    background: #219150;
+  }
+  .search-bar-card {
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 18px rgba(44,62,80,0.07);
+    border: 1px solid #f1f1f1;
+  }
+  .offer-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(90deg,#ff6b6b,#ff3b3b);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 14px;
+    font-weight:700;
+    font-size: 0.82rem;
+    z-index: 20;
+  }
+  .offer-old-price { color:#aaa; text-decoration:line-through; margin-left:0.6rem; font-size:0.95rem; }
+  @media (max-width: 600px) {
+    .product-card-modern {
+      width: 95vw;
+      min-height: 240px;
+      max-height: 340px;
+    }
+    .product-card-modern .product-image {
+      height: 120px;
+    }
+    .splide__slide {
+      padding: 6px;
+    }
+    .search-bar-card {
+      flex-direction: column;
+      gap: 0.7rem;
+      max-width: 98vw;
+      padding: 1rem 0.5rem;
+    }
+    .search-bar-card .btn {
+      margin-left: 0 !important;
+    }
+  }
+</style>
+
+<div class="container py-4">
+  <h1 class="text-center mb-4 fw-bold" style="letter-spacing:1px;">Shop Fresh Products</h1>
+
+ 
+
+  <!-- Search + rest unchanged -->
+  <div class="d-flex justify-content-center">
+    <div class="search-bar-card d-flex align-items-center px-3 py-2 shadow-sm" style="border-radius: 18px; background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); max-width: 500px; width: 100%;">
+      <div style="flex:1; position:relative;">
+        <input id="product-search" style="background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);" type="text" class="form-control" placeholder="Search for products..." autocomplete="off" style="border-radius: 12px; min-width: 220px;">
+        <div id="search-loader" style="display:none; position:absolute; right:12px; top:50%; transform:translateY(-50%);">
+          <span class="spinner-border spinner-border-sm text-success"></span>
+        </div>
+        <div id="search-results" class="list-group position-absolute w-100" style="z-index:10; max-height:300px; overflow-y:auto; display:none;"></div>
+      </div>
+      <a href="{% url 'viewcart' %}" class="btn btn-outline-success ms-3 d-flex align-items-center justify-content-center" style="border-radius:50%; width:44px; height:44px;">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+ <!-- OfferZone row (shows only when there are active offer items) -->
+  {% if offer_items_list %}
+  <section class="mb-4">
+    <div class="container-fluid">
+      <h3 class="section-title text-center mb-3">OfferZone</h3>
+      <div class="splide" id="offerzone" aria-label="Offer zone carousel">
+        <div class="splide__track">
+          <ul class="splide__list">
+            {% for it in offer_items_list %}
+            {% with p=it.product %}
+            <li class="splide__slide">
+              <div class="product-card-modern">
+                <span class="offer-badge">IN OFFER</span>
+                <a href="{% url 'product_details' id=p.id %}" class="text-decoration-none">
+                  {% if p.cover_image %}
+                    <img src="{{ p.cover_image.url }}" class="product-image" alt="{{ p.title }}">
+                  {% else %}
+                    <div class="product-image" style="display:flex;align-items:center;justify-content:center;color:#999;">
+                      No image
+                    </div>
+                  {% endif %}
+                </a>
+                <div class="card-body">
+                  <div class="product-title">{{ p.title|upper }}</div>
+                  <div class="product-desc">{{ p.description|truncatechars:50 }}</div>
+                  <div class="product-price-row">
+                    <div>
+                      <span class="product-price text-danger">₹{{ it.offer_price }}/{{ p.unit }}</span>
+                      <span class="offer-old-price">₹{{ p.price }}/{{ p.unit }}</span>
+                    </div>
+                    <div class="small text-muted"></div>
+                  </div>
+                  <div class="text-center">
+                    <a href="{% url 'product_details' id=p.id %}" class="btn btn-success text-white">
+                      <i class="fas fa-cart-plus"></i> Add To Cart
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </li>
+            {% endwith %}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+<div class="container-fluid">
+  <section class="py-5">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="section-title text-center mb-4">Vegetables</h3>
+          <div class="splide" id="featured">
+            <div class="splide__track">
+              <ul class="splide__list">
+                {% for v in vegetables %}
+                <li class="splide__slide">
+                  <div class="product-card-modern">
+                    {% with offer=offer_map|dict_get:v.id %}
+                      {% if offer %}
+                        <span class="offer-badge">IN OFFER</span>
+                      {% endif %}
+                    {% endwith %}
+                    <a href="{% url 'product_details' id=v.id %}" class="text-decoration-none">
+                      {% if v.cover_image %}
+                        <img src="{{ v.cover_image.url }}" class="product-image" alt="{{ v.title }}" />
+                      {% else %}
+                        <div class="product-image" style="display:flex;align-items:center;justify-content:center;color:#999;">No image</div>
+                      {% endif %}
+                    </a>
+                    <div class="card-body">
+                      <div class="product-title">{{ v.title|upper }}</div>
+                      <div class="product-desc">{{ v.description|truncatechars:50 }}</div>
+                      <div class="product-price-row">
+                        {% with offer=offer_map|dict_get:v.id %}
+                          {% if offer %}
+                            <span class="product-price text-danger">₹{{ offer.offer_price }} /{{ v.unit }}</span>
+                            <span class="product-old-price">₹{{ v.price }}</span>
+                          {% else %}
+                            <span class="product-price">₹{{ v.price }} /{{ v.unit }}</span>
+                            <span class="product-old-price" style="display:none;">{{v.original_price}} /{{ v.unit }}</span>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                      <div class="text-center">
+                        {% if v.is_out_of_stock %}
+                          <button class="btn btn-secondary" disabled>Out of stock</button>
+                        {% else %}
+                          <a href="{% url 'product_details' id=v.id %}" class="btn btn-success text-white">
+                            <i class="fas fa-cart-plus"></i> Add To Cart
+                          </a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="section-title text-center mb-4">Fruits</h3>
+          <div class="splide" id="fruits-slider">
+            <div class="splide__track">
+              <ul class="splide__list">
+                {% for f in fruits %}
+                <li class="splide__slide">
+                  <div class="product-card-modern">
+                    {% with offer=offer_map|dict_get:f.id %}
+                      {% if offer %}
+                        <span class="offer-badge">IN OFFER</span>
+                      {% endif %}
+                    {% endwith %}
+                    <a href="{% url 'product_details' id=f.id %}" class="text-decoration-none">
+                      {% if f.cover_image %}
+                        <img src="{{ f.cover_image.url }}" class="product-image" alt="{{ f.title }}" />
+                      {% else %}
+                        <div class="product-image" style="display:flex;align-items:center;justify-content:center;color:#999;">No image</div>
+                      {% endif %}
+                    </a>
+                    <div class="card-body">
+                      <div class="product-title">{{ f.title|upper }}</div>
+                      <div class="product-desc">{{ f.description|truncatechars:50 }}</div>
+                      <div class="product-price-row">
+                        {% with offer=offer_map|dict_get:f.id %}
+                          {% if offer %}
+                            <span class="product-price text-danger">₹{{ offer.offer_price }} /{{ f.unit }}</span>
+                            <span class="product-old-price">₹{{ f.price }}</span>
+                          {% else %}
+                            <span class="product-price">₹{{ f.price }} /{{ f.unit }}</span>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                      <div class="text-center">
+                        <a href="{% url 'product_details' id=f.id %}" class="btn btn-success text-white">
+                          <i class="fas fa-cart-plus"></i> Add To Cart
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Splide JS initialization -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('offerzone')) {
+      new Splide('#offerzone', {
+        type: 'loop',
+        perPage: 4,
+        gap: '1rem',
+        autoplay: true,
+        interval: 3000,
+        pauseOnHover: true,
+        breakpoints: { 1200:{perPage:3}, 768:{perPage:2}, 480:{perPage:1} }
+      }).mount();
+    }
+    // existing in-page splide initializers remain
+    if (document.getElementById('featured')) {
+      new Splide('#featured', { type: 'loop', perPage: 4, gap:'1rem', autoplay:true, interval:2500, pauseOnHover:true, breakpoints:{1200:{perPage:3},768:{perPage:2},480:{perPage:1}} }).mount();
+    }
+    if (document.getElementById('fruits-slider')) {
+      new Splide('#fruits-slider', { type: 'loop', perPage: 4, gap:'1rem', autoplay:true, interval:2500, pauseOnHover:true, breakpoints:{1200:{perPage:3},768:{perPage:2},480:{perPage:1}} }).mount();
+    }
+  });
+</script>
+<script>
+const searchInput = document.getElementById('product-search');
+const loader = document.getElementById('search-loader');
+const resultsBox = document.getElementById('search-results');
+let searchTimeout = null;
+
+if (searchInput) {
+  searchInput.addEventListener('input', function() {
+    const query = this.value.trim();
+    resultsBox.style.display = 'none';
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (query.length === 0) return;
+
+    loader.style.display = 'inline-block';
+    searchTimeout = setTimeout(() => {
+      fetch(`/search/?q=${encodeURIComponent(query)}`, { credentials: 'same-origin' })
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          loader.style.display = 'none';
+          resultsBox.innerHTML = '';
+          if (!data.results || data.results.length === 0) {
+            resultsBox.innerHTML = '<div class="list-group-item">No results found.</div>';
+          } else {
+            data.results.forEach(item => {
+              const el = document.createElement('a');
+              el.href = `/product_details/${item.id}`;
+              el.className = 'list-group-item list-group-item-action d-flex align-items-center';
+              el.innerHTML = `
+                <img src="${item.image}" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:8px;margin-right:10px;">
+                <span>${item.title}</span>
+                <span class="ms-auto text-success fw-bold">₹${item.price} ${item.unit ? '/' + item.unit : ''}</span>
+              `;
+              resultsBox.appendChild(el);
+            });
+          }
+          resultsBox.style.display = 'block';
+        })
+        .catch(() => {
+          loader.style.display = 'none';
+          resultsBox.innerHTML = '<div class="list-group-item text-danger">Error searching.</div>';
+          resultsBox.style.display = 'block';
+        });
+    }, 400); // debounce
+  });
+
+  searchInput.addEventListener('focus', function() {
+    if (resultsBox.innerHTML.trim() !== '') resultsBox.style.display = 'block';
+  });
+}
+
+// hide results when clicking outside
+document.addEventListener('click', function(e) {
+  if (searchInput && resultsBox && !searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+    resultsBox.style.display = 'none';
+  }
+});
+</script>
+{% endblock %}

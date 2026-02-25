@@ -1,0 +1,404 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<!-- [Head] start -->
+
+<head>
+  <title>User Dashboard</title>
+  <!-- [Meta] -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+  <!-- [Favicon] icon -->
+  <link rel="icon" href="" type="image/x-icon">
+
+  <!-- data tables css -->
+  <link rel="stylesheet" href="{% static 'admin/assets/css/plugins/dataTables.bootstrap5.min.css' %}">
+  <!-- [Google Font] Family -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    id="main-font-link">
+  <!-- [Tabler Icons] https://tablericons.com -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/tabler-icons.min.css' %}">
+  <!-- [Feather Icons] https://feathericons.com -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/feather.css' %}">
+  <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/fontawesome.css' %}">
+  <!-- [Material Icons] https://fonts.google.com/icons -->
+  <link rel="stylesheet" href="{% static 'admin/assets/fonts/material.css' %}">
+  <!-- [Template CSS Files] -->
+  <link rel="stylesheet" href="{% static 'admin/assets/css/style.css' %}" id="main-style-link">
+  <link rel="stylesheet" href="{% static 'admin/assets/css/style-preset.css' %}">
+
+</head>
+<!-- [Head] end -->
+<!-- [Body] Start -->
+
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+  <!-- [ Pre-loader ] start -->
+  <div class="loader-bg">
+    <div class="loader-track">
+      <div class="loader-fill"></div>
+    </div>
+  </div>
+  <!-- [ Pre-loader ] End -->
+  <!-- [ Sidebar Menu ] start -->
+  <nav class="pc-sidebar">
+    <div class="navbar-wrapper">
+      <div class="m-header bg-success align-items-center justify-content-center">
+        <a href="{% url 'index' %}" class="b-brand text-primary">
+          <!-- ========   Change your logo from here   ============ -->
+          <h4 class="text-light">USER</h4>
+        </a>
+      </div>
+      <div class="navbar-content">
+        <ul class="pc-navbar">
+          <li class="pc-item">
+            <a href="{% url 'userdash' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+              <span class="pc-mtext">Dashboard</span>
+            </a>
+          </li>
+
+          <li class="pc-item pc-caption">
+            <label>Manage</label>
+            <i class="ti ti-dashboard"></i>
+          </li>
+
+           <li class="pc-item">
+            <a href="{% url 'userprofile' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-user"></i></span>
+              <span class="pc-mtext">View Profile</span>
+            </a>
+
+          </li> <li class="pc-item">
+            <a href="{% url 'editprofile' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-edit"></i></span>
+              <span class="pc-mtext">Edit Profile</span>
+            </a>
+
+          </li> <li class="pc-item">
+            <a href="{% url 'viewcart' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-box"></i></span>
+              <span class="pc-mtext">Cart</span>
+            </a>
+          </li>
+
+          </li> <li class="pc-item">
+            <a href="{% url 'products' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-box"></i></span>
+              <span class="pc-mtext">Products</span>
+            </a>
+          </li>
+
+          <li class="pc-item">
+            <a href="{% url 'userorders' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-box"></i></span>
+              <span class="pc-mtext">Orders</span>
+            </a>
+          </li>
+          <!-- <li class="pc-item">
+            <a href="" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
+              <span class="pc-mtext">Color</span>
+            </a>
+          </li> -->
+          
+          {% comment %} <li class="pc-item pc-caption">
+            <label>Actions</label>
+            <i class="ti ti-news"></i>
+          </li>
+          <li class="pc-item">
+            <a href="{% url 'userchangepassword' %}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-lock"></i></span>
+              <span class="pc-mtext">Change Password</span>
+            </a>
+          </li>
+          <li class="pc-item">
+            <a href="{% url 'userlogout' %}" class="pc-link">
+              <span class="pc-micon"> <i class="ti ti-power"></i></span>
+              <span class="pc-mtext">Logout</span>
+            </a>
+          </li>
+
+        </ul> {% endcomment %}
+
+      </div>
+    </div>
+  </nav>
+  <!-- [ Sidebar Menu ] end --> <!-- [ Header Topbar ] start -->
+  <header class="pc-header">
+    <div class="header-wrapper"> <!-- [Mobile Media Block] start -->
+      <div class="me-auto pc-mob-drp">
+        <ul class="list-unstyled">
+          <!-- ======= Menu collapse Icon ===== -->
+          <li class="pc-h-item pc-sidebar-collapse">
+            <a href="#" class="pc-head-link ms-0" id="sidebar-hide">
+              <i class="ti ti-menu-2"></i>
+            </a>
+          </li>
+          <li class="pc-h-item pc-sidebar-popup">
+            <a href="#" class="pc-head-link ms-0" id="mobile-collapse">
+              <i class="ti ti-menu-2"></i>
+            </a>
+          </li>
+          <li class="dropdown pc-h-item d-inline-flex d-md-none">
+            <a class="pc-head-link dropdown-toggle arrow-none m-0" data-bs-toggle="dropdown" href="#" role="button"
+              aria-haspopup="false" aria-expanded="false">
+              <i class="ti ti-search"></i>
+            </a>
+            <div class="dropdown-menu pc-h-dropdown drp-search">
+              <form class="px-3">
+                <div class="form-group mb-0 d-flex align-items-center">
+                  <i data-feather="search"></i>
+                  <input type="search" class="form-control border-0 shadow-none" placeholder="Search here. . .">
+                </div>
+              </form>
+            </div>
+          </li>
+          <li class="pc-h-item d-none d-md-inline-flex">
+            <form class="header-search">
+              <i data-feather="search" class="icon-search"></i>
+              <input type="search" class="form-control" placeholder="Search here. . .">
+            </form>
+          </li>
+        </ul>
+      </div>
+      <!-- [Mobile Media Block end] -->
+      <div class="ms-auto">
+        <ul class="list-unstyled">
+          
+          <!-- Offer notification button -->
+          <li class="pc-h-item d-inline-block mt-4 me-2">
+            <button id="user-offer-btn" type="button" class="btn btn-sm btn-light position-relative" data-bs-toggle="modal" data-bs-target="#userOffersModal" title="Offers">
+              <i class="ti ti-gift"></i>
+              <span id="user-offer-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:10px;line-height:1;">
+                0
+              </span>
+            </button>  
+          </li>
+
+          <!-- existing profile dropdown follows -->
+          <li class="dropdown pc-h-item header-user-profile">
+            <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button"
+              aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
+              {% if profile %}
+                <img src="{{ profile.url }}" alt="user-image" class="user-avtar">
+              {% else %}
+                <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="user-image" class="user-avtar">
+              {% endif %}
+               <span>{{name}}</span>
+            </a>
+            <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
+              <div class="dropdown-header">
+                <div class="d-flex mb-1">
+                  <div class="flex-shrink-0">
+                    {% if profile %}
+                      <img src="{{ profile.url }}" alt="user-image" class="user-avtar wid-35">
+                    {% else %}
+                      <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="user-image" class="user-avtar wid-35">
+                    {% endif %}
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-1">{{name}}</h6>
+                    <span>{{userid}}</span>
+                  </div>
+                  <!-- LOGOUT -->
+                  <a href="{% url 'userlogout' %}" class="pc-head-link bg-transparent"><i class="ti ti-power text-danger"></i></a>
+                </div>
+              </div>
+              
+              <div class="tab-content" id="mysrpTabContent">
+                <div class="tab-pane fade show active" id="drp-tab-1" role="tabpanel" aria-labelledby="drp-t1"
+                  tabindex="0">
+                  <a href="{% url 'userchangepassword' %}" class="dropdown-item">
+                    <i class="ti ti-edit-circle"></i>
+                    <span>Change Password</span>
+                  </a>
+                  <a href="{% url 'userlogout' %}" class="dropdown-item">
+                    <i class="ti ti-power"></i>
+                    <span>Logout</span>
+                  </a>
+                </div>
+                
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <!-- [ Header ] end -->
+
+
+
+  <!-- [ Main Content ] start -->
+  <div class="pc-container">
+    <div class="pc-content">
+      {% block user %}
+
+      {% endblock %}
+    </div>
+  </div>
+  <!-- [ Main Content ] end -->
+  <footer class="pc-footer">
+    <div class="footer-wrapper container-fluid">
+      <div class="row">
+        <div class="col-sm my-1">
+          <p class="m-0">All Right Reserved to <a href="#"
+              target="_blank">Shreyansh Srivastava</a>.</p>
+        </div>
+        <div class="col-auto my-1">
+          <ul class="list-inline footer-link mb-0">
+            <li class="list-inline-item"><a href="{% url 'index' %}">Home</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- [Page Specific JS] start -->
+  <script src="{% static 'admin/assets/js/plugins/apexcharts.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/pages/dashboard-default.js' %}"></script>
+  <!-- [Page Specific JS] end -->
+  <!-- Required Js -->
+  <script src="{% static 'admin/assets/js/plugins/popper.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/simplebar.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/bootstrap.min.js' %}"></script>
+  <script src="{% static 'admin/assets/js/fonts/custom-font.js' %}"></script>
+  <script src="{% static 'admin/assets/js/pcoded.js' %}"></script>
+  <script src="{% static 'admin/assets/js/plugins/feather.min.js' %}"></script>
+
+
+
+
+
+  <script>layout_change('light');</script>
+
+
+
+
+  <script>change_box_container('false');</script>
+
+
+
+  <script>layout_rtl_change('false');</script>
+
+
+  <script>preset_change("preset-1");</script>
+
+
+  <script>font_change("Public-Sans");</script>
+
+  <script src="{% static 'admin/assets/js/plugins/sweetalert2.all.min.js' %}"></script>
+  {% if messages %}
+    {% for message in messages %}
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.addEventListener('mouseenter', Swal.stopTimer);
+              toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+          });
+          Toast.fire({
+            icon: '{{message.tags}}',
+            title: '{{message}}'
+          });
+      </script>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Offers Modal -->
+  <div class="modal fade" id="userOffersModal" tabindex="-1" aria-labelledby="userOffersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Active Offers</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Offer</th>
+                  <th>Until</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="user-offers-tbody">
+                <!-- populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a id="user-view-all-btn" href="{% url 'view_user_offers' %}" class="btn btn-sm btn-primary">View All</a>
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- add script to poll and populate offers modal -->
+  <script>
+  (function(){
+    const badge = document.getElementById('user-offer-badge');
+    const tbody = document.getElementById('user-offers-tbody');
+    const apiUrl = "{% url 'recent_offers_api' %}"; // keep namespaced api
+    function isoToLocal(dt) {
+      if (!dt) return '';
+      try { return new Date(dt).toLocaleString(); } catch(e){ return dt; }
+    }
+    function updateOffers() {
+      fetch(apiUrl, { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          if (!data) return;
+          if (badge) badge.textContent = data.count || 0;
+          if (!tbody || !data.items) return;
+          tbody.innerHTML = '';
+          data.items.forEach(o => {
+            const tr = document.createElement('tr');
+            const until = o.end_datetime ? isoToLocal(o.end_datetime) : '—';
+            const statusHtml = o.is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Expired</span>';
+            tr.innerHTML = `
+              <td>
+                <div><strong>${o.title}</strong></div>
+                <div class="small text-muted">${o.description}</div>
+              </td>
+              <td>${until}</td>
+              <td>${statusHtml}</td>
+            `;
+            if (o.is_active) {
+              tr.style.cursor = 'pointer';
+              tr.addEventListener('click', function(){
+                // go to product listing page and pass offer id as query param
+                window.location.href = '/products/?offer=' + encodeURIComponent(o.id);
+              });
+            } else {
+              tr.classList.add('text-muted');
+              tr.style.opacity = '0.7';
+            }
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(()=>{ /* ignore errors silently */ });
+    }
+    updateOffers();
+    setInterval(updateOffers, 30000);
+    const modalEl = document.getElementById('userOffersModal');
+    if (modalEl) modalEl.addEventListener('show.bs.modal', updateOffers);
+  })();
+  </script>
+</body>
+<!-- [Body] end -->
+
+</html>

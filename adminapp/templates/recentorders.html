@@ -1,0 +1,84 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block admin %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Recent Orders</h4>
+    <form method="get" class="d-flex align-items-center">
+      <select name="filter" class="form-select form-select-sm me-2">
+        <option value="today" {% if filter_type == 'today' %}selected{% endif %}>Today</option>
+        <option value="yesterday" {% if filter_type == 'yesterday' %}selected{% endif %}>Yesterday</option>
+        <option value="last7" {% if filter_type == 'last7' %}selected{% endif %}>Last 7 Days</option>
+        <option value="lastmonth" {% if filter_type == 'lastmonth' %}selected{% endif %}>Last Month</option>
+        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All</option>
+      </select>
+      <button class="btn btn-sm btn-primary" type="submit">Apply</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>User</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Ordered At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>#{{ r.order_number|default:r.order_id }}</td>
+              <td>{{ r.user_name }}</td>
+              <td style="min-width:200px;">
+                {% if r.product_image %}
+                  {% if r.product_image|slice:":4" == "http" or r.product_image|slice:":1" == "/" %}
+                    <img src="{{ r.product_image }}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;">
+                  {% else %}
+                    <img src="{{ MEDIA_URL }}{{ r.product_image }}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;">
+                  {% endif %}
+                {% else %}
+                  <div style="width:48px;height:48px;background:#f2f2f2;border-radius:6px;display:inline-block;vertical-align:middle;margin-right:8px;"></div>
+                {% endif %}
+                <span>{{ r.product_title }}</span>
+              </td>
+              <td>{{ r.quantity }}</td>
+              <td>₹{{ r.price }}</td>
+              <td>₹{{ r.total }}</td>
+              <td>{{ r.ordered_at|date:"d M Y, H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="text-center text-muted p-3">No records found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if is_paginated %}
+    <div class="card-footer d-flex justify-content-center">
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?filter={{ filter_type }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+          {% for p in page_obj.paginator.page_range %}
+            <li class="page-item {% if p == page_obj.number %}active{% endif %}"><a class="page-link" href="?filter={{ filter_type }}&page={{ p }}">{{ p }}</a></li>
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?filter={{ filter_type }}&page={{ page_obj.next_page_number }}">Next</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends 'adminbase.html' %}
+{% block admin %}
+<style>
+  /* Dashboard refresh styles (keeps responsive) */
+  .dash-hero {
+    background: linear-gradient(90deg, rgba(46,204,113,0.06), rgba(15,183,245,0.04));
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 18px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+  .dash-hero .hero-left { min-width: 220px; }
+  .dash-hero h1 { font-size: 1.25rem; margin:0; }
+  .dash-hero p { margin:0; color:#6b7280; font-size:0.95rem; }
+
+  .stats-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  @media (max-width:991px){ .stats-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width:575px){ .stats-grid { grid-template-columns: 1fr; } }
+
+  .stat-card {
+    border-radius:12px;
+    padding:14px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    box-shadow: 0 6px 18px rgba(17,24,39,0.06);
+    min-height:84px;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .stat-link { display:block; width:100%; height:100%; color:inherit; text-decoration:none; }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(17,24,39,0.10); }
+
+  .stat-left { display:flex; gap:12px; align-items:center; }
+  .stat-icon {
+    width:52px; height:52px; border-radius:10px;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-size:20px;
+  }
+  .stat-body h3 { margin:0; font-size:1.15rem; color:#071133; }
+  .stat-body p { margin:0; font-size:0.82rem; color:#6b7280; }
+
+  .bg-gradient-1 { background: linear-gradient(135deg,#06b6d4,#06a6f7); }
+  .bg-gradient-2 { background: linear-gradient(135deg,#7c3aed,#a78bfa); }
+  .bg-gradient-3 { background: linear-gradient(135deg,#06b6d4,#10b981); }
+  .bg-gradient-4 { background: linear-gradient(135deg,#f97316,#fb923c); }
+  .bg-gradient-5 { background: linear-gradient(135deg,#ef4444,#f97316); }
+  .bg-gradient-6 { background: linear-gradient(135deg,#06b6d4,#3b82f6); }
+
+  .small-metric { font-size:1.4rem; font-weight:700; color:#071133; }
+  .metric-sub { font-size:0.82rem; color:#6b7280; margin-top:6px; }
+
+  .insights-row { display:flex; gap:16px; margin-top:18px; flex-wrap:wrap; }
+  .insight {
+    flex:1; min-width:260px; background:#fff; padding:14px; border-radius:10px;
+    box-shadow: 0 6px 18px rgba(17,24,39,0.04);
+  }
+  .alert-item { display:flex; gap:12px; align-items:flex-start; padding:10px; border-radius:8px; transition:background .08s ease; }
+  .alert-item:hover { background:#f8f9fb; }
+  .alert-thumb { width:52px; height:52px; border-radius:8px; background:#f2f4f7; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; }
+  .alert-body { flex:1; }
+  .alert-meta { font-size:0.8rem; color:#6b7280; }
+
+  .greet { font-weight:600; font-size:1.1rem; margin-bottom:4px; }
+</style>
+
+<div class="container-fluid">
+  <div class="dash-hero mt-3">
+    <div class="hero-left">
+      <div class="greet">{{ greeting }}, Admin</div>
+      <p>Overview of platform activity — quick insights into users, products and orders.</p>
+    </div>
+    <div class="hero-right" style="display:flex;gap:10px;align-items:center;">
+      <a href="{% url 'addproduct' %}" class="btn btn-outline-primary btn-sm">Add Product</a>
+      <a href="{% url 'adminorders' %}" class="btn btn-primary btn-sm">View Orders</a>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <!-- USERS (leave as-is, not clickable) -->
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-icon bg-gradient-1"><i class="ti ti-user"></i></div>
+        <div class="stat-body">
+          <h3 class="small-metric">{{ user_count }}</h3>
+          <p class="metric-sub">Total Users</p>
+        </div>
+      </div>
+      <div class="card-actions"><div id="spark-users" class="sparkline"></div></div>
+    </div>
+
+    <!-- PRODUCTS (clickable -> viewproduct) -->
+    <a href="{% url 'viewproduct' %}" class="stat-link" aria-label="Manage Products">
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon bg-gradient-2"><i class="ti ti-plant"></i></div>
+          <div class="stat-body">
+            <h3 class="small-metric">{{ product_count }}</h3>
+            <p class="metric-sub">Total Products</p>
+          </div>
+        </div>
+        <div class="card-actions"><div id="spark-products" class="sparkline"></div></div>
+      </div>
+    </a>
+
+    <!-- ORDERS (clickable -> adminorders) -->
+    <a href="{% url 'adminorders' %}" class="stat-link" aria-label="View Orders">
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon bg-gradient-3"><i class="ti ti-box"></i></div>
+          <div class="stat-body">
+            <h3 class="small-metric">{{ order_count }}</h3>
+            <p class="metric-sub">Total Orders</p>
+          </div>
+        </div>
+        <div class="card-actions"><div id="spark-orders" class="sparkline"></div></div>
+      </div>
+    </a>
+
+    <!-- CATEGORIES (clickable -> viewcat) -->
+    <a href="{% url 'viewcat' %}" class="stat-link" aria-label="View Categories">
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon bg-gradient-4"><i class="ti ti-layout-grid"></i></div>
+          <div class="stat-body">
+            <h3 class="small-metric">{{ category_count }}</h3>
+            <p class="metric-sub">Categories</p>
+          </div>
+        </div>
+        <div class="card-actions"><div id="spark-cats" class="sparkline"></div></div>
+      </div>
+    </a>
+
+    <!-- TOTAL REVENUE (clickable -> total_income) -->
+    <a href="{% url 'total_income' %}" class="stat-link" aria-label="Total Revenue">
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon bg-gradient-5"><i class="ti ti-coin"></i></div>
+          <div class="stat-body">
+            <h3 class="small-metric">₹{{ total_revenue }}</h3>
+            <p class="metric-sub">Total Revenue (INR)</p>
+          </div>
+        </div>
+        <div class="card-actions"><div id="spark-rev" class="sparkline"></div></div>
+      </div>
+    </a>
+
+    <!-- ENQUIRIES (clickable -> viewenq) -->
+    <a href="{% url 'viewenq' %}" class="stat-link" aria-label="Enquiries">
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon bg-gradient-6"><i class="ti ti-message-circle"></i></div>
+          <div class="stat-body">
+            <h3 class="small-metric">{{ enquiry_count }}</h3>
+            <p class="metric-sub">Enquiries</p>
+          </div>
+        </div>
+        <div class="card-actions"><div id="spark-enq" class="sparkline"></div></div>
+      </div>
+    </a>
+  </div>
+
+  <div class="insights-row">
+    <!-- Recent Stock Alerts (replaces latest orders) -->
+    <div class="insight">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>Recent Stock Alerts</strong>
+        <a href="{% url 'viewalerts' %}" class="small text-primary">View all</a>
+      </div>
+      <div class="mt-3">
+        <div class="list-group list-group-flush">
+          {% if recent_alerts %}
+            {% for a in recent_alerts %}
+              <a href="{% url 'checkstock' %}?page={{ a.page }}&scroll_to={{ a.product_id }}" class="list-group-item list-group-item-action alert-item">
+                <div class="alert-thumb">
+                  <i class="ti ti-alert-circle" style="font-size:20px;color:#ef4444;"></i>
+                </div>
+                <div class="alert-body">
+                  <div class="fw-bold">{{ a.product_title }}</div>
+                  <div class="alert-meta small text-muted">{{ a.message }}</div>
+                </div>
+                <div class="text-end" style="min-width:110px;">
+                  <div class="small text-muted">{{ a.created_at|date:"d M Y, H:i" }}</div>
+                </div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <div class="list-group-item small text-muted">No recent alerts</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>Quick Actions</strong>
+        <span class="small text-muted">Shortcuts</span>
+      </div>
+      <div class="mt-3 d-flex flex-wrap gap-2">
+        <a href="{% url 'addproduct' %}" class="btn btn-outline-primary btn-sm">Add Product</a>
+        <a href="{% url 'viewproduct' %}" class="btn btn-outline-secondary btn-sm">Products</a>
+        <a href="{% url 'viewcat' %}" class="btn btn-outline-success btn-sm">Categories</a>
+        <a href="{% url 'checkstock' %}" class="btn btn-outline-warning btn-sm">Check Stock</a>
+        <a href="{% url 'adminorders' %}" class="btn btn-primary btn-sm">Manage Orders</a>
+      </div>
+
+      <div class="dash-footer">
+        <small>Tip: Use filters in Orders page for targeted insights. Charts below are sparklines for a quick trend view.</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- sparklines using ApexCharts if available -->
+<script>
+(function(){
+  function safeRender(elId, data, color){
+    try{
+      if(typeof ApexCharts === 'undefined') return;
+      const opts = {
+        chart: { type: 'area', height: 36, sparkline: { enabled: true } },
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { opacity: 0.12 },
+        series: [{ data: data }],
+        colors: [color],
+        tooltip: { enabled: false }
+      };
+      const chart = new ApexCharts(document.querySelector('#'+elId), opts);
+      chart.render();
+    }catch(e){ /* silent */ }
+  }
+
+  // use JSON strings passed from view
+  safeRender('spark-users', {{ users_trend|safe }}, '#06b6d4');
+  safeRender('spark-products', {{ products_trend|safe }}, '#7c3aed');
+  safeRender('spark-orders', {{ orders_trend|safe }}, '#10b981');
+  safeRender('spark-cats', {{ cats_trend|safe }}, '#f97316');
+  safeRender('spark-rev', {{ revenue_trend|safe }}, '#ef4444');
+  safeRender('spark-enq', {{ enq_trend|safe }}, '#06b6d4');
+})();
+</script>
+{% endblock %}

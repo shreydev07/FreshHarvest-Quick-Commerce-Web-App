@@ -1,0 +1,250 @@
+{% extends 'userbase.html' %}
+{% load static %}
+{% block user %}
+<style>
+  .profile-page { max-width:1100px; margin:0 auto; padding:20px; }
+  .profile-card { border-radius:14px; overflow:hidden; box-shadow:0 8px 30px rgba(12, 38, 26, 0.06); background:#fff; }
+  .profile-header { background: linear-gradient(90deg, rgba(16,185,129,0.06), rgba(34,197,94,0.03)); padding:22px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  .avatar-wrap { width:140px; height:140px; border-radius:12px; overflow:hidden; flex-shrink:0; background:#fff; display:flex; align-items:center; justify-content:center; }
+  .avatar-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+  .profile-title h2 { margin:0; font-size:1.35rem; font-weight:700; color:#08331f; }
+  .profile-title p { margin:6px 0 0; color:#6b7280; }
+  .profile-actions { margin-left:auto; display:flex; gap:10px; align-items:center; }
+  .btn-sm-wide { padding:.45rem .8rem; }
+
+  .profile-body { padding:20px; display:grid; grid-template-columns: 1fr 360px; gap:20px; }
+  @media (max-width:991px){ .profile-body { grid-template-columns:1fr; } }
+
+  .info-card, .activity-card { background:#fff; border-radius:10px; padding:16px; box-shadow: 0 6px 18px rgba(12,38,26,0.03); }
+  .info-row { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px dashed rgba(15,23,42,0.04); }
+  .info-row:last-child { border-bottom:0; }
+  .info-label { color:#6b7280; font-size:.92rem; }
+  .info-value { color:#071133; font-weight:600; }
+
+  .stat-grid { display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; }
+  .stat { background:linear-gradient(180deg, rgba(16,185,129,0.06), rgba(34,197,94,0.02)); border-radius:8px; padding:12px; min-width:120px; text-align:center; }
+  .stat .num { font-weight:700; color:#08331f; font-size:1.1rem; }
+  .stat .lbl { color:#6b7280; font-size:.85rem; }
+
+  .recent-list { display:flex; flex-direction:column; gap:10px; }
+  .recent-item { display:flex; gap:12px; align-items:center; padding:10px; border-radius:8px; transition:background .08s; text-decoration:none; color:inherit; }
+  .recent-item:hover { background:#fbfff9; }
+  .recent-thumb { width:56px; height:56px; border-radius:8px; overflow:hidden; background:#f0fff4; display:flex; align-items:center; justify-content:center; }
+  .muted { color:#6b7280; font-size:.9rem; }
+
+  .edit-note { font-size:.85rem; color:#6b7280; margin-top:8px; }
+</style>
+
+<div class="profile-page">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-wrap">
+        {% if user.profile %}
+          <img id="profile-main-img" src="{{ user.profile.url }}" alt="{{ user.name }} avatar">
+        {% else %}
+          <img id="profile-main-img" src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="avatar">
+        {% endif %}
+      </div>
+
+      <div class="profile-title">
+        <h2>{{ user.name }}</h2>
+        <p class="muted">
+          {% if user.email %}{{ user.email }}{% else %}No email provided{% endif %} ·
+          {% if user.contactno %}{{ user.contactno }}{% else %}No contact{% endif %}
+        </p>
+
+        <div class="stat-grid" style="margin-top:12px;">
+          <div style="margin-top:8px;">
+            <!-- removed data-bs attributes to avoid conflicts; script will open modal -->
+            <button id="viewProfileBtn" type="button" class="btn btn-outline-success btn-sm">
+              View profile pic
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <a href="{% url 'editprofile' %}" class="btn btn-success btn-sm btn-sm-wide">Edit Profile</a>
+        <a href="{% url 'viewcart' %}" class="btn btn-outline-secondary btn-sm">My Cart</a>
+      </div>
+    </div>
+
+    <div class="profile-body">
+      <div>
+        <div class="info-card">
+          <h5>Contact & Details</h5>
+
+          <div class="info-row">
+            <div class="info-label">Full name</div>
+            <div class="info-value">{{ user.name|default:"—" }}</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ user.email|default:"—" }}</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Phone</div>
+            <div class="info-value">{{ user.contactno|default:"—" }}</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Address</div>
+            <div class="info-value">
+              {% if user.address %}{{ user.address }}{% else %}<span class="muted">Not provided</span>{% endif %}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Additional notes</div>
+            <div class="info-value muted">{% if user.notes %}{{ user.notes }}{% else %}—{% endif %}</div>
+          </div>
+
+          <div class="edit-note">
+            Click Edit Profile to update contact information, delivery addresses and preferences.
+          </div>
+        </div>
+
+        <div class="activity-card" style="margin-top:16px;">
+          <h5>Recent activity</h5>
+          {% if recent_orders %}
+            <div class="recent-list">
+              {% for o in recent_orders %}
+                <a href="{% url 'userorder_detail' o.id %}" class="recent-item">
+                  <div class="recent-thumb">
+                    <i class="ti ti-shopping-bag" style="font-size:20px;color:#059669;"></i>
+                  </div>
+                  <div style="flex:1">
+                    <div class="fw-bold">Order #{{ o.order_number }}</div>
+                    <div class="muted">{{ o.ordered_at|date:"d M Y, H:i" }} · ₹{{ o.total_amount }}</div>
+                  </div>
+                  <div class="muted" style="min-width:90px;text-align:right;">{{ o.status|capfirst }}</div>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="muted">No recent orders.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <div class="info-card">
+          <h5>Profile Summary</h5>
+          <p class="muted">A quick snapshot of your account. Keep your profile updated for a smoother shopping experience.</p>
+          <hr>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <div class="info-label">Default payment</div>
+              <div class="info-value">{% if user.default_payment %}**** **** **** {{ user.default_payment_last4 }}{% else %}<span class="muted">Not set</span>{% endif %}</div>
+            </div>
+
+            <div>
+              <div class="info-label">Saved addresses</div>
+              <div class="info-value">{% if user.address_count %}{{ user.address_count }}{% else %}0{% endif %}</div>
+            </div>
+
+            <div>
+              <div class="info-label">Newsletter</div>
+              <div class="info-value">{% if user.subscribed %}Subscribed{% else %}Not subscribed{% endif %}</div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <a href="{% url 'editprofile' %}" class="btn btn-success btn-sm">Edit Profile</a>
+            <a href="{% url 'userorders' %}" class="btn btn-outline-secondary btn-sm">View Orders</a>
+          </div>
+        </div>
+
+        <div class="activity-card" style="margin-top:16px;">
+          <h5>Help & Support</h5>
+          <p class="muted">Need help? Visit <a href="#">Help Center</a> or <a href="{% url 'contact' %}">Contact Support</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal moved inside the block so script can target it reliably -->
+<div class="modal fade" id="profilePicModal" tabindex="-1" aria-labelledby="profilePicModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="profilePicModalLabel">Profile photo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex justify-content-center align-items-center" style="min-height:60vh;">
+        {% if user.profile %}
+          <img id="modalProfileImg" src="{{ user.profile.url }}" alt="{{ user.name }} photo" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;">
+        {% else %}
+          <img id="modalProfileImg" src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="avatar" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;">
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button id="closeProfileModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('viewProfileBtn');
+  var modalEl = document.getElementById('profilePicModal');
+  if (!btn || !modalEl) return;
+
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    // If Bootstrap Modal available, use it (recommended)
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      try {
+        var instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        instance.show();
+        return;
+      } catch (err) { /* fallthrough to fallback */ }
+    }
+
+    // Fallback: show modal by toggling classes and adding backdrop
+    modalEl.classList.add('show');
+    modalEl.style.display = 'block';
+    modalEl.setAttribute('aria-modal', 'true');
+    modalEl.removeAttribute('aria-hidden');
+
+    if (!document.querySelector('.modal-backdrop')) {
+      var backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
+  });
+
+  // Close handling for fallback (Bootstrap handles this when present)
+  function closeFallback() {
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    modalEl.removeAttribute('aria-modal');
+    var b = document.querySelector('.modal-backdrop');
+    if (b) b.remove();
+  }
+
+  // close buttons for fallback
+  modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close, #closeProfileModal').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) return;
+      closeFallback();
+    });
+  });
+
+  // close on ESC for fallback
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) return;
+      if (modalEl.classList.contains('show')) closeFallback();
+    }
+  });
+});
+</script>
+
+{% endblock %}

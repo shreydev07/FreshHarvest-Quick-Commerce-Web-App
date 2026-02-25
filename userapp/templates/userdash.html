@@ -1,0 +1,169 @@
+{% extends 'userbase.html' %}
+{% load static %}
+{% block user %}
+<style>
+  /* Green theme dashboard */
+  .ud-hero {
+    background: linear-gradient(90deg, rgba(16,185,129,0.06), rgba(34,197,94,0.03));
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+  .ud-hero .greet { font-weight:700; font-size:1.15rem; }
+  .ud-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  @media (max-width:991px){ .ud-grid{ grid-template-columns: repeat(2,1fr); } }
+  @media (max-width:575px){ .ud-grid{ grid-template-columns: 1fr; } }
+  .ud-card {
+    background:#fff; padding:14px; border-radius:12px; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; box-shadow: 0 8px 22px rgba(16,185,129,0.06); transition:transform .12s ease;
+  }
+  .ud-card:hover { transform: translateY(-4px); }
+  .ud-left { display:flex; gap:12px; align-items:center; }
+  .ud-icon { width:56px; height:56px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:20px; }
+  .ud-body h3{ margin:0; font-size:1.2rem; color:#0b3a2d; }
+  .ud-sub { margin:0; font-size:0.85rem; color:#6b7280; }
+  .bg-g1{ background: linear-gradient(135deg,#10b981,#059669); }
+  .bg-g2{ background: linear-gradient(135deg,#34d399,#10b981); }
+  .bg-g3{ background: linear-gradient(135deg,#16a34a,#4ade80); }
+
+  .insights { display:flex; gap:16px; margin-top:18px; flex-wrap:wrap; }
+  .insight { flex:1; min-width:260px; background:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(16,185,129,0.04); }
+  .offer-item { display:flex; gap:12px; align-items:center; padding:10px; border-radius:8px; transition:background .08s ease; }
+  .offer-item:hover { background:#f8fffa; }
+  .offer-thumb { width:56px; height:56px; border-radius:8px; background:#f0fff4; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; }
+  .profile-card { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .profile-left { display:flex; gap:12px; align-items:center; }
+  .profile-img { width:64px; height:64px; border-radius:10px; object-fit:cover; background:#f3f4f6; }
+  .btn-edit { white-space:nowrap; }
+</style>
+
+<div class="container-fluid">
+  <div class="ud-hero mt-4">
+    <div>
+      <div class="greet">{{ greeting }}, {{ name }}</div>
+      <div class="text-muted" style="font-size:0.92rem;">Quick overview of your account</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a href="{% url 'viewcart' %}" class="btn btn-outline-success btn-sm">View Cart</a>
+      <a href="{% url 'products' %}" class="btn btn-success btn-sm">Browse Products</a>
+    </div>
+  </div>
+
+  <div class="ud-grid">
+    <a href="{% url 'viewcart' %}" class="stat-link" aria-label="Cart">
+      <div class="ud-card">
+        <div class="ud-left">
+          <div class="ud-icon bg-g1"><i class="ti ti-shopping-cart"></i></div>
+          <div class="ud-body">
+            <h3>{{ cart_count }}</h3>
+            <p class="ud-sub">Items in Cart</p>
+          </div>
+        </div>
+        <div class="text-muted small">Go to cart</div>
+      </div>
+    </a>
+
+    <a href="{% url 'products' %}" class="stat-link" aria-label="Products">
+      <div class="ud-card">
+        <div class="ud-left">
+          <div class="ud-icon bg-g2"><i class="ti ti-box"></i></div>
+          <div class="ud-body">
+            <h3>{{ product_count }}</h3>
+            <p class="ud-sub">Products</p>
+          </div>
+        </div>
+        <div class="text-muted small">Browse</div>
+      </div>
+    </a>
+
+    <a href="{% url 'userorders' %}" class="stat-link" aria-label="Orders">
+      <div class="ud-card">
+        <div class="ud-left">
+          <div class="ud-icon bg-g3"><i class="ti ti-clipboard-check"></i></div>
+          <div class="ud-body">
+            <h3>{{ order_count }}</h3>
+            <p class="ud-sub">Your Orders</p>
+          </div>
+        </div>
+        <div class="text-muted small">View orders</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="insights">
+    <div class="insight">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>Recent Offers</strong>
+        <a href="{% url 'view_user_offers' %}" class="small text-success">View all</a>
+      </div>
+      <div class="mt-3">
+        <div class="list-group list-group-flush">
+          {% if recent_offers %}
+            {% for o in recent_offers %}
+-              <a href="{% if o.first_product_id %}{% url 'product_details' o.first_product_id %}{% else %}{% url 'products' %}{% endif %}" class="list-group-item list-group-item-action offer-item">
++              {# Avoid NoReverseMatch for unknown 'productdetails' URL name.
++                 Use a safe direct product path fallback; adjust '/product/{{id}}/' if your app uses a different pattern. #}
++              <a href="{% if o.first_product_id %}/product/{{ o.first_product_id }}/{% else %}{% url 'products' %}{% endif %}" class="list-group-item list-group-item-action offer-item">
+                 <div class="offer-thumb">
+                   {% if o.image %}
+                     <img src="{{ o.image }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                   {% else %}
+                     <i class="ti ti-gift" style="font-size:22px;color:#059669;"></i>
+                   {% endif %}
+                 </div>
+                 <div style="flex:1;">
+                   <div class="fw-bold">{{ o.title }}</div>
+                   <div class="small text-muted">{{ o.description }}</div>
+                 </div>
+                 <div class="small text-muted" style="min-width:120px;text-align:right;">
+                   {% if o.end_datetime %}{{ o.end_datetime|date:"d M Y" }}{% else %}—{% endif %}
+                 </div>
+               </a>
+             {% endfor %}
+          {% else %}
+            <div class="list-group-item small text-muted">No recent offers</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>Your Profile</strong>
+        <span class="small text-muted">Manage</span>
+      </div>
+      <div class="mt-3 profile-card">
+        <div class="profile-left">
+          {% if profile %}
+            <img src="{{ profile.url|default:profile }}" alt="profile" class="profile-img">
+          {% else %}
+            <img src="{% static 'admin/assets/images/user/avatar-2.jpg' %}" alt="profile" class="profile-img">
+          {% endif %}
+          <div>
+            <div class="fw-bold">{{ name }}</div>
+            <div class="small text-muted">{{ userid }}</div>
+            <div class="small text-muted mt-1">Profile details here</div>
+          </div>
+        </div>
+        <div>
+          <a href="{% url 'editprofile' %}" class="btn btn-outline-success btn-sm btn-edit">Edit Profile</a>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <small class="text-muted">Quick links</small>
+        <div class="mt-2 d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-success" href="{% url 'products' %}">Shop</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'viewcart' %}">Cart</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'userorders' %}">Orders</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,748 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block main %}
+
+<style>
+  :root{ --brand:#28a745; --muted:#6c757d; }
+
+  .hero {
+    min-height: clamp(65vh, 83vh, 100vh);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:0; /* sit under navbar */
+    margin-top: -120px;
+    padding-top: 110px;
+    background-size:cover;
+    background-position:center;
+    background-attachment: fixed;
+  }
+  .hero-overlay{ position:absolute; inset:0; background:rgba(8,31,12,0.45); }
+  .hero-content{ position:relative; z-index:2; color:#fff; text-align:center; max-width:980px; padding: 0 16px; }
+
+  .hero-content h1{ color:#fff; font-size: clamp(1.6rem, 3.6vw, 3.2rem); line-height:1.05; margin-bottom:0.5rem; }
+  .hero-content p{ color:rgba(255,255,255,0.95); margin-bottom:18px; }
+
+  /* Search */
+  .search-wrapper{ width:100%; max-width:720px; margin:0 auto; position:relative; }
+  .search-input{ width:100%; padding:12px 16px; border-radius:40px; border:0; box-shadow:0 8px 24px rgba(0,0,0,.12); font-size:1rem; background:#fff; color:#222; }
+  .btn-shop-now{ display:inline-block; margin-top:12px; padding:10px 28px; border-radius:999px; background: linear-gradient(135deg,#2ecc71,#28a745); color:#fff; border:0; font-weight:700; transition:transform .2s ease;
+}
+.btn-shop-now:hover, .btn-shop-now:focus { transform: scale(1.03); }
+
+  /* Minimal suggestion box anchored to input width */
+  .search-results{ position:absolute; top:calc(100% + 10px); left:0; z-index:1300; display:none; max-height:220px; overflow:auto; background:#fff; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.12); width:100%; }
+  .search-item{ display:flex; gap:10px; padding:8px 10px; align-items:center; border-bottom:1px solid #f2f2f2; text-decoration:none; color:#222; }
+  .search-item img{ width:48px; height:48px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+  .search-item .meta{ flex:1; }
+  .search-item .meta .title{ font-weight:600; font-size:.95rem; }
+  .search-item .meta .sub{ font-size:.82rem; color:var(--muted); }
+  .search-item .price{ color:var(--brand); font-weight:700; white-space:nowrap; font-size:.95rem; }
+
+  @media (max-width:576px){
+    .search-wrapper{ max-width:92%; }
+    .search-input{ padding:10px; }
+    .search-results{ max-height:260px; }
+    .btn-shop-now{ padding:10px 20px; }
+  }
+
+  /* Keep other sections responsive and avoid left/right AOS */
+  .card{ border-radius:12px; }
+  .card .card-img-top{ object-fit:cover; height:200px; }
+  @media (max-width:767px){ .card .card-img-top{ height:150px; } }
+  .about-img img{ width:100%; height:auto; border-radius:12px; object-fit:cover; max-height:520px; }
+
+  /* "How it works" */
+  .how-steps { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+  .how-step { background:#fff; border-radius:12px; padding:20px; width:260px; box-shadow:0 8px 24px rgba(0,0,0,.06); text-align:center; }
+  .how-step .icon { font-size:28px; color:var(--brand); margin-bottom:12px; }
+
+  /* Offers slider styling */
+  #offers-section {
+    padding: 28px 0;
+    background: linear-gradient(180deg, rgba(245,252,243,1) 0%, rgba(239,250,255,1) 100%);
+  }
+  .offers-card {
+    position:relative;
+    overflow:hidden;
+    border-radius:14px;
+    min-height:140px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding:18px;
+    color:#093f1e;
+    /* semi-transparent white with blur for glassmorphism */
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 30px rgba(12,44,15,0.06);
+  }
+  .offers-media {
+    flex:0 0 160px;
+    height:100px;
+    border-radius:10px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#e8f8ef,#f0fbff);
+  }
+  .offers-media img { width:100%; height:100%; object-fit:cover; display:block; }
+  .offers-body { flex:1 1 auto; min-width:0; }
+  .offers-title { font-weight:700; font-size:1.05rem; color:#116530; margin-bottom:6px; }
+  .offers-desc { color:#234b3a; font-size:0.95rem; opacity:0.90; max-height:72px; overflow:hidden; }
+  .offers-badge {
+    position:absolute;
+    left:14px;
+    top:14px;
+    background:#28a745;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:12px;
+    box-shadow:0 6px 18px rgba(40,167,69,0.12);
+  }
+  .offers-cta {
+    margin-top:12px;
+  }
+  .offers-cta .btn { padding:6px 10px; font-size:13px; }
+
+  /* Splide tweaks */
+  .splide__slide { padding:6px; }
+  @media (max-width:768px){
+    .offers-media { display:none; }
+    .offers-card { padding:14px; min-height:120px; }
+  }
+
+  #search-bar input{
+    background: rgba(255,255,255,0.06);backdrop-filter: blur(16px);-webkit-backdrop-filter: blur(16px);
+
+  }
+  #cat-cards{
+    background: linear-gradient(135deg, #ffffff 0%, #a5d6a7 15%, #c1dfc3 35%, #c8e6c9 60%, #a5d6a7 85%, #f5f5f5 100%);
+  }
+
+
+  .service-card{
+    background: rgba(255,255,255,0.06);backdrop-filter: blur(16px);-webkit-backdrop-filter: blur(16px);
+  }
+  .service-card h4{
+    color: white;
+  }
+</style>
+
+<!-- Hero Section -->
+<section class="hero" style="background-image: url('{% static 'img/heri.jpeg' %}');">
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <div class="container hero-content" data-aos="fade-up" role="region" aria-label="Homepage hero">
+    <h1 class="fw-bold">Farm-Fresh Vegetables Delivered</h1>
+    <p class="lead mb-3">From our fields to your doorstep — 100% natural & organic</p>
+
+    <form id="hero-search-form" method="get" action="{% url 'products' %}" class="search-wrapper" role="search" aria-label="Search products">
+      <div style="position:relative;" id="search-bar">
+        <input id="hero-search-input" name="q" type="search" class="search-input btn btn-outline-dark" placeholder="Search Vegetables, Fruits, Groceries..." autocomplete="off" aria-label="Search products" value="{{ q|default:'' }}">
+        <div id="search-loader" style="display:none; position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:1250;">
+          <span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>
+        </div>
+
+        <div id="hero-search-results" class="search-results list-group" role="listbox" aria-live="polite" aria-label="Search suggestions"></div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn-shop-now" id="shop-now-btn">Shop Now</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- Dynamic Categories (replace the old static block) -->
+<section id="categories" class="py-5">
+  <div class="container">
+    <div class="text-center mb-4" data-aos="zoom-in">
+      <h2 class="fw-bold">Shop by Categories</h2>
+      <p class="text-muted">Choose from our fresh and organic collections</p>
+    </div>
+
+    <div id="categories-splide" class="splide" aria-label="Categories carousel">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% for c in categories %}
+          <li class="splide__slide p-2">
+            <div class="cat-card card-glass p-3 h-100 shadow-sm rounded-3"  id="cat-cards" role="article" aria-label="{{ c.name }}">
+              <div class="text-center w-100">
+                <div class="cat-icon mx-auto mb-3" aria-hidden="true">
+                  <i class="fas fa-sitemap"></i>
+                </div>
+                <div class="cat-title">{{ c.name }}</div>
+                <div class="cat-desc">{{ c.description|default:"" }}</div>
+              </div>
+              <a href="{% url 'products' %}?category={{ c.id }}" class="btn cat-btn mt-3 w-100" aria-label="Shop {{ c.name }}">Shop {{ c.name }}</a>
+            </div>
+          </li>
+          {% empty %}
+          <li class="splide__slide p-3">
+            <div class="p-3 text-muted">No categories available.</div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* minimal safe styles for dynamic category cards */
+.cat-card{ border:0; border-radius:12px; min-height:180px; display:flex; flex-direction:column; justify-content:space-between; background:#fff; }
+.cat-icon{ width:72px; height:72px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; background:linear-gradient(135deg,#2ecc71,#28a745); margin:0 auto 8px; }
+.cat-title{ font-weight:700; margin-top:6px; }
+.cat-desc{ color:#6c757d; font-size:.92rem; margin-top:8px; min-height:36px; }
+.cat-btn{ border-radius:10px; padding:8px 12px; background:linear-gradient(90deg,#2ecc71,#28a745); color:#fff; border:0; font-weight:700; }
+@media (max-width:768px){ .cat-icon{ width:56px;height:56px;font-size:22px; } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof Splide !== 'undefined') {
+    const el = document.getElementById('categories-splide');
+    if (el) {
+      new Splide(el, {
+        type: 'loop',
+        perPage: 4,
+        gap: '1rem',
+        breakpoints: {1200:{perPage:3}, 992:{perPage:3}, 768:{perPage:2}, 576:{perPage:1}}
+      }).mount();
+    }
+  }
+});
+</script>
+
+<!-- Offers Slider (placed after categories) -->
+{% if active_offers and active_offers.count %}
+<section id="offers-section" aria-label="Active offers">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h4 class="mb-0">Current Offers</h4>
+        <small class="text-muted">Grab them before they end</small>
+      </div>
+      <a href="{% url 'products' %}?offer=all" class="btn btn-sm btn-outline-success">See all offers</a>
+    </div>
+
+    <div id="offersSplide" class="splide" role="region" aria-label="Offers slider">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% for offer in active_offers %}
+          {% cycle 'img/sl1.png'  'img/sl3.jpg' as slide_img %}
+          <li class="splide__slide">
+            <a href="{% url 'products' %}?offer={{ offer.id }}#offerzone" class="text-decoration-none">
+              <div class="offers-card">
+                <div class="offers-badge">OFFER</div>
+
+                <div class="offers-media">
+                  {% if offer.image %}
+                    <img src="{{ offer.image.url }}" alt="{{ offer.title|default:'Offer' }}">
+                  {% else %}
+                    <img src="{% static slide_img %}" alt="offer image">
+                  {% endif %}
+                </div>
+
+                <div class="offers-body">
+                  <div class="offers-title">{{ offer.title|default:"Special Offer" }}</div>
+                  <div class="offers-desc">
+                    {{ offer.description|truncatechars:180|default:"Great discounts and fresh picks for you." }}
+                  </div>
+
+                  <div class="offers-cta">
+                    <button type="button" class="btn btn-sm btn-success">Shop Offer</button>
+                    <small class="ms-2 text-muted">Ends: {% if offer.end_datetime %}{{ offer.end_datetime|date:"d M Y" }}{% else %}—{% endif %}</small>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- optional spacer / next sections -->
+<section class="py-4">
+  <!-- ...existing homepage sections ... -->
+</section>
+
+<!-- Splide init (auto slide) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // only init if Splide available and element exists
+  if (typeof Splide !== 'undefined') {
+    var el = document.getElementById('offersSplide');
+    if (el) {
+      new Splide(el, {
+        type: 'loop',
+        perPage: 2,
+        perMove: 1,
+        gap: '1rem',
+        autoplay: true,
+        interval: 3600,
+        pauseOnHover: true,
+        arrows: true,
+        pagination: true,
+        breakpoints: {
+          992: { perPage: 1 },
+          576: { perPage: 1 }
+        }
+      }).mount();
+    }
+  }
+});
+</script>
+
+<!-- About -->
+<section class="py-5" data-aos="fade-up" style="background-image:url('{% static "img/bg-ab.jpg" %}'); background-size:cover;background-attachment:fixed;">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-6 about-img" data-aos="fade-up">
+        <img src="{% static 'img/store3.jpeg' %}" alt="Farm" style="height: 80vh;" class="img-fluid rounded">
+      </div>
+      <div class="col-lg-6" data-aos="fade-up">
+        <h2 class="fw-bold">About Fresh Veggies Mart</h2>
+        <p class="text-muted">We bring the freshest, most vibrant, organic produce straight to your home. Our farmers work tirelessly to ensure every bite is pure and delicious.</p>
+        <ul class="list-unstyled">
+          <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>100% Organic & Natural</li>
+          <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Direct from Farm to Home</li>
+          <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Eco-friendly & Sustainable</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products (Splide) -->
+<section class="py-5 bg-light">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3 px-3">
+      <h3 class="mb-0 fw-bold text-center">Featured Products</h3>
+    </div>
+
+    <div id="featured" class="splide px-3" aria-label="Featured products carousel">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% for b in products %}
+          <li class="splide__slide p-3">
+            <a href="{% url 'product_details' b.id %}" class="text-decoration-none text-dark">
+              <div class="card h-100 shadow-sm border-0 rounded-3">
+                {% if b.cover_image %}
+                  <img src="{{ b.cover_image.url }}" class="card-img-top rounded-top" alt="{{ b.title }}">
+                {% else %}
+                  <img src="{% static 'img/placeholder.jpg' %}" class="card-img-top rounded-top" alt="No image">
+                {% endif %}
+                <div class="card-body text-center d-flex flex-column">
+                  <div>
+                    <h6 class="card-title fw-semibold mb-2">{{ b.title }}</h6>
+                    <div class="mb-2">
+                      <span class="price text-success fw-bold">₹{{ b.price }}{% if b.unit %} /{{ b.unit.name|default:b.unit }}{% endif %}</span>
+                      {% if b.original_price %}
+                        <span class="old-price ms-2 text-muted text-decoration-line-through">₹{{ b.original_price }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <form action="{% url 'addtocart' b.id %}" method="post" class="mt-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100">Add To Cart</button>
+                  </form>
+                </div>
+              </div>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    
+    <div class=" text-center mt-3 px-3">
+                <a href="{% url 'products' %}" class="btn btn-outline-success">View all</a>
+
+    </div>
+
+  </div>
+</section>
+
+  <!-- 🥗 How It Works Section (redesigned) -->
+  <section id="how-it-works" class="py-5" style="          background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(245,252,245,0.85));
+">
+    <div class="container">
+      <div class="text-center mb-5" data-aos="zoom-in">
+        <h2 class="fw-bold">How It Works</h2>
+        <p class="text-muted">Ordering fresh vegetables online is simple, fast and reliable.</p>
+      </div>
+
+      <style>
+        /* How it works - modern cards */
+        #how-it-works .how-row { display:flex; gap:1.25rem; flex-wrap:wrap; justify-content:center; }
+        #how-it-works .how-card {
+          background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(245,252,245,0.85));
+          border-radius:16px;
+          min-width:250px;
+          max-width:320px;
+          width:100%;
+          padding:22px;
+          box-shadow: 0 10px 30px rgba(20,60,30,0.06);
+          transition: transform .28s ease, box-shadow .28s ease;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          text-align:center;
+          border:1px solid rgba(34,125,50,0.06);
+        }
+        #how-it-works .how-card:hover { transform:translateY(-8px); box-shadow:0 20px 50px rgba(15,60,25,0.12); }
+
+        .how-badge {
+          width:56px; height:56px; border-radius:12px;
+          display:flex; align-items:center; justify-content:center;
+          font-weight:700; color:#fff; font-size:1.05rem;
+          margin-bottom:14px; box-shadow:0 8px 22px rgba(10,40,20,0.08);
+        }
+
+        .how-icon {
+          width:74px; height:74px; border-radius:18px;
+          display:flex; align-items:center; justify-content:center;
+          font-size:30px; color:#fff; margin-bottom:12px;
+          box-shadow:0 12px 28px rgba(10,40,20,0.08);
+        }
+
+        .how-title { font-size:1.05rem; font-weight:700; margin-bottom:8px; color:#123; }
+        .how-desc { color:rgba(10,10,10,0.66); font-size:.95rem; margin-bottom:14px; }
+
+        /* theme colors */
+        .bg-veg { background: linear-gradient(135deg,#2ecc71,#28a745); }
+        .bg-cart { background: linear-gradient(135deg,#18a0ff,#2b8cff); }
+        .bg-truck { background: linear-gradient(135deg,#ffb74d,#ff9800); }
+
+        .how-cta {
+          padding:8px 14px; border-radius:999px; font-weight:700;
+          color:#fff; border:0; box-shadow:0 8px 20px rgba(0,0,0,0.08);
+          background: linear-gradient(90deg,#2e7d32,#28a745);
+        }
+
+        @media (max-width:767px){
+          #how-it-works .how-card { max-width:100%; padding:18px; }
+          .how-icon{ width:64px; height:64px; font-size:26px; }
+        }
+      </style>
+
+      <div class="how-row">
+        <div class="how-item" data-aos="fade-up">
+          <div class="how-card" role="article" aria-label="Browse products">
+            <div class="how-badge bg-veg" aria-hidden="true">1</div>
+            <div class="how-icon bg-veg" aria-hidden="true">
+              <i class="fas fa-search"></i>
+            </div>
+            <div class="how-title">Browse Products</div>
+            <div class="how-desc">Explore a curated selection of fresh vegetables, fruits & groceries.</div>
+            <button class="how-cta" aria-label="Browse Products">Start Browsing</button>
+          </div>
+        </div>
+
+        <div class="how-item" data-aos="fade-up" data-aos-delay="120">
+          <div class="how-card" role="article" aria-label="Add to cart and checkout">
+            <div class="how-badge bg-cart" aria-hidden="true">2</div>
+            <div class="how-icon bg-cart" aria-hidden="true">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="how-title">Add to Cart & Checkout</div>
+            <div class="how-desc">Select quantities and safely checkout with multiple payment options.</div>
+            <button class="how-cta" style="background:linear-gradient(90deg,#18a0ff,#0d8cff);" aria-label="Add to Cart">Checkout Securely</button>
+          </div>
+        </div>
+
+        <div class="how-item" data-aos="fade-up" data-aos-delay="240">
+          <div class="how-card" role="article" aria-label="Fast delivery">
+            <div class="how-badge bg-truck" aria-hidden="true">3</div>
+            <div class="how-icon bg-truck" aria-hidden="true">
+              <i class="fas fa-truck"></i>
+            </div>
+            <div class="how-title">Fast Delivery</div>
+            <div class="how-desc">We pack and deliver your order quickly to preserve freshness.</div>
+            <button class="how-cta" style="background:linear-gradient(90deg,#ffb74d,#ff9800);" aria-label="Fast Delivery">Track Delivery</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+<!-- Services / Testimonials / Newsletter keep using fade-up / zoom-in only -->
+<section class="py-5" style="background-image:url('{% static "img/sl1.png" %}'); background-size:cover;background-attachment:fixed;">
+  <div class="container">
+    <h2 class="text-center fw-bold text-white mb-4">Our Services</h2>
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="service-card p-4 shadow-sm rounded-4 " data-aos="zoom-in">
+          <i class="fas fa-truck fa-2x text-warning mb-3"></i>
+          <h4 class="fw-bold">Fast Delivery</h4>
+          <p class="small text-muted">Get groceries delivered within hours.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-card p-4 shadow-sm rounded-4 " data-aos="zoom-in" data-aos-delay="150">
+          <i class="fas fa-leaf fa-2x text-success mb-3"></i>
+          <h4 class="fw-bold">Organic & Fresh</h4>
+          <p class="small text-muted">Naturally grown, chemical-free produce.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-card p-4 shadow-sm rounded-4 " data-aos="zoom-in" data-aos-delay="300">
+          <i class="fas fa-shield-alt fa-2x text-danger mb-3"></i>
+          <h4 class="fw-bold">Trusted Quality</h4>
+          <p class="small text-muted">Every item handpicked for freshness.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- review cards -->
+<!-- Testimonials (inline-styled, theme-matching) -->
+<section id="testimonials" aria-label="Customer testimonials" data-aos="fade-up" style="padding:48px 0;">
+  <div class="container" style="max-width:1100px;margin:0 auto;padding:0 16px;">
+    <div style="text-align:center;margin-bottom:32px;" data-aos="zoom-in">
+      <h2 style="margin:0;font-weight:800;color:#164b20;font-size:1.75rem;">What Our Customers Say</h2>
+      <p style="margin:8px 0 0;color:rgba(18,18,18,0.64);">Real feedback from real customers — fresh, honest and heartfelt.</p>
+    </div>
+
+    <div role="list" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;">
+      <!-- Card 1 -->
+      <article role="listitem" aria-label="Customer testimonial 1" data-aos="fade-up" data-aos-delay="0"
+               style="width:320px;max-width:100%;background:linear-gradient(180deg,#ffffff,#f4fff5);border-radius:14px;padding:18px;box-shadow:0 16px 36px rgba(12,60,24,0.06);border:1px solid rgba(34,125,50,0.06);display:flex;flex-direction:column;gap:12px;transition:transform .25s ease;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div aria-hidden="true" style="width:64px;height:64px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;background:linear-gradient(135deg,#2e7d32,#28a745);box-shadow:0 8px 20px rgba(40,120,60,0.12);flex:0 0 64px;">PS</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#eaf6ea,#ddf1df);color:#2b742b;font-weight:700;font-size:.82rem;">Verified buyer</div>
+            <p style="margin:10px 0 0;font-style:italic;color:rgba(18,18,18,0.7);line-height:1.35;max-height:72px;overflow:hidden;">"Absolutely love the freshness — vegetables stay crisp for days and the delivery is always on time."</p>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+          <div>
+            <div style="font-weight:800;color:#123;">Priya Sharma</div>
+            <div style="font-size:.86rem;color:rgba(18,18,18,0.56);">Home Chef, Mumbai</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="color:#28a745;font-weight:800;">5.0 ★</div>
+            <small style="color:rgba(18,18,18,0.45);display:block;">2 weeks ago</small>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article role="listitem" aria-label="Customer testimonial 2" data-aos="fade-up" data-aos-delay="120"
+               style="width:320px;max-width:100%;background:linear-gradient(180deg,#ffffff,#f4fbff);border-radius:14px;padding:18px;box-shadow:0 16px 36px rgba(8,70,120,0.05);border:1px solid rgba(14,110,220,0.06);display:flex;flex-direction:column;gap:12px;transition:transform .25s ease;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div aria-hidden="true" style="width:64px;height:64px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;background:linear-gradient(135deg,#18a0ff,#0d8cff);box-shadow:0 8px 20px rgba(13,140,204,0.12);flex:0 0 64px;">RM</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#eef6ff,#e6f1ff);color:#0b63b8;font-weight:700;font-size:.82rem;">Top rated</div>
+            <p style="margin:10px 0 0;font-style:italic;color:rgba(18,18,18,0.7);line-height:1.35;max-height:72px;overflow:hidden;">"Delivery is always on time. Quality is consistent — I keep coming back every week."</p>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+          <div>
+            <div style="font-weight:800;color:#123;">Rohan Mehta</div>
+            <div style="font-size:.86rem;color:rgba(18,18,18,0.56);">Office Manager, Pune</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="color:#0d8cff;font-weight:800;">4.9 ★</div>
+            <small style="color:rgba(18,18,18,0.45);display:block;">3 days ago</small>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article role="listitem" aria-label="Customer testimonial 3" data-aos="fade-up" data-aos-delay="240"
+               style="width:320px;max-width:100%;background:linear-gradient(180deg,#fffaf5,#fff6ee);border-radius:14px;padding:18px;box-shadow:0 16px 36px rgba(120,70,10,0.05);border:1px solid rgba(255,170,60,0.06);display:flex;flex-direction:column;gap:12px;transition:transform .25s ease;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div aria-hidden="true" style="width:64px;height:64px;border-radius:12px;display:grid;place-items:center;color:#1b1b1b;font-weight:700;background:linear-gradient(135deg,#ffb74d,#ff9800);box-shadow:0 8px 20px rgba(255,150,50,0.12);flex:0 0 64px;">AV</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#fff7ec,#fff0d6);color:#a15f00;font-weight:700;font-size:.82rem;">Fresh & natural</div>
+            <p style="margin:10px 0 0;font-style:italic;color:rgba(18,18,18,0.7);line-height:1.35;max-height:72px;overflow:hidden;">"Great service and amazing organic fruits. Packaging is excellent and produce lasts longer."</p>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+          <div>
+            <div style="font-weight:800;color:#123;">Anjali Verma</div>
+            <div style="font-size:.86rem;color:rgba(18,18,18,0.56);">Nutritionist, Delhi</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="color:#ff9800;font-weight:800;">4.8 ★</div>
+            <small style="color:rgba(18,18,18,0.45);display:block;">1 month ago</small>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<!-- subscribe to newsletter -->
+
+<section id="newsletter" aria-label="Newsletter subscription" data-aos="fade-up"
+  style="padding:48px 0 64px;background:linear-gradient(180deg,#f7fff8,#f0fff2);">
+  <div class="container" style="max-width:980px;margin:0 auto;padding:0 16px;">
+    <div class="row align-items-center gx-3"
+         style="background:linear-gradient(180deg,#ffffff,#f4fff5);border-radius:12px;padding:18px;border:1px solid rgba(34,125,50,0.06);box-shadow:0 18px 40px rgba(15,60,25,0.06);">
+      <!-- Left: text -->
+      <div class="col-12 col-md-5" style="padding:8px 12px;">
+        <div style="font-weight:800;color:#164b20;font-size:1.1rem;">Get fresh updates & offers</div>
+        <div style="color:rgba(18,18,18,0.64);margin-top:6px;font-size:.95rem;">Subscribe to our newsletter for weekly deals and farm-fresh arrivals.</div>
+        <div style="font-size:.86rem;color:rgba(18,18,18,0.56);margin-top:8px;">We respect your privacy — unsubscribe anytime by dropping an enquiry.</div>
+      </div>
+
+      <!-- Right: form (responsive: stacks on xs, horizontal on sm+) -->
+      <div class="col-12 col-md-7" style="padding:8px 12px;">
+          <form id="newsletter-form" method="post" action="{% url 'subscribe' %}" novalidate
+              class="d-flex flex-column flex-sm-row align-items-stretch" style="gap:10px;">
+          {% csrf_token %}
+          <input id="newsletter-email" name="email" type="email" placeholder="Enter your email address" aria-label="Email address" required
+                 class="form-control"
+                 style="flex:1;min-width:160px;padding:12px 14px;border-radius:10px;border:1px solid rgba(18,18,18,0.08);background:#fff;box-shadow:inset 0 2px 6px rgba(0,0,0,0.02);font-size:1rem;color:#123;">
+          <button id="newsletter-btn" type="submit" aria-label="Subscribe"
+                  style="padding:12px 18px;border-radius:10px;border:0;cursor:pointer;background:linear-gradient(90deg,#2e7d32,#28a745);color:#fff;font-weight:800;box-shadow:0 10px 28px rgba(40,120,60,0.12);min-width:140px;">
+            Subscribe
+          </button>
+
+          <div style="display:flex;flex-direction:column;justify-content:center;min-width:120px;padding-left:6px;">
+            <div id="nl-success" role="status" aria-live="polite" style="display:none;color:#117a1a;font-weight:700;">Subscribed!</div>
+            <div id="nl-error" role="alert" aria-live="assertive" style="display:none;color:#c72b2b;font-weight:700;">Invalid email.</div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var form = document.getElementById('newsletter-form');
+      var email = document.getElementById('newsletter-email');
+      var success = document.getElementById('nl-success');
+      var error = document.getElementById('nl-error');
+
+      function hideMsgs(){ if(success) success.style.display='none'; if(error) error.style.display='none'; }
+
+      if(form){
+        form.addEventListener('submit', function(e){
+          hideMsgs();
+          var val = email && email.value ? email.value.trim() : '';
+          var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if(!val || !re.test(val)){
+            e.preventDefault();
+            if(error){ error.textContent = 'Please enter a valid email address.'; error.style.display='block'; }
+            if(email) email.focus();
+            return false;
+          }
+          if(success){ success.textContent='Subscribing...'; success.style.display='block'; }
+          return true;
+        });
+
+        email.addEventListener('input', function(){ hideMsgs(); });
+      }
+    })();
+  </script>
+</section>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Splide init if present
+  if (typeof Splide !== 'undefined') {
+    const p = document.getElementById('featured');
+    if (p) new Splide(p, { type:'loop', perPage:4, gap:'1rem', breakpoints:{1200:{perPage:3},768:{perPage:2},576:{perPage:1}} }).mount();
+  }
+
+  const input = document.getElementById('hero-search-input');
+  const resultsBox = document.getElementById('hero-search-results');
+  const loader = document.getElementById('search-loader');
+  const endpoint = "{% url 'product_search' %}";
+  let debounce = null;
+
+  if (!input) return;
+
+  function hideResults() {
+    if (resultsBox) {
+      resultsBox.style.display = 'none';
+      resultsBox.innerHTML = '';
+    }
+  }
+
+  function renderResults(items) {
+    if (!resultsBox) return;
+    resultsBox.innerHTML = '';
+    if (!items || items.length === 0) {
+      resultsBox.innerHTML = '<div class="p-3 text-muted">No results found.</div>';
+      resultsBox.style.display = 'block';
+      return;
+    }
+    items.forEach(item => {
+      const a = document.createElement('a');
+      a.href = '/product_details/' + item.id;
+      a.className = 'search-item list-group-item-action';
+      const priceText = item.price ? '₹' + item.price + (item.unit ? ' /' + item.unit : '') : '';
+      a.innerHTML = `
+        <img src="${item.image || '/static/img/placeholder.jpg'}" alt="${(item.title||'')}" loading="lazy">
+        <div class="meta">
+          <div class="title">${item.title}</div>
+          <div class="sub">${item.category ? item.category + (item.unit ? ' • ' + item.unit : '') : (item.unit ? item.unit : '')}</div>
+        </div>
+        <div class="price">${priceText}</div>
+      `;
+      resultsBox.appendChild(a);
+    });
+    resultsBox.style.display = 'block';
+  }
+
+  input.addEventListener('input', function() {
+    const q = this.value.trim();
+    if (loader) loader.style.display = 'inline-block';
+    if (debounce) clearTimeout(debounce);
+    if (!q) { hideResults(); if (loader) loader.style.display = 'none'; return; }
+
+    debounce = setTimeout(() => {
+      fetch(`${endpoint}?q=${encodeURIComponent(q)}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {                      // <-- fixed syntax here
+          if (loader) loader.style.display = 'none';
+          renderResults(data.results || []);
+        })
+        .catch(() => {
+          if (loader) loader.style.display = 'none';
+          if (resultsBox) {
+            resultsBox.innerHTML = '<div class="p-3 text-danger">Search error</div>';
+            resultsBox.style.display = 'block';
+          }
+        });
+    }, 250);
+  });
+
+  input.addEventListener('focus', function() {
+    if (resultsBox && resultsBox.innerHTML.trim() !== '') resultsBox.style.display = 'block';
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && (!resultsBox || !resultsBox.contains(e.target))) hideResults();
+  });
+});
+</script>
+
+{% endblock %}

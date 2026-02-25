@@ -1,0 +1,24 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block admin %}
+<div class="row">
+    <div class="col-sm-12">
+        <h3 class="text-center text-success">Add New Unit</h3>
+    </div>
+    <div class="col-sm-9 mx-auto mt-4 ">
+        <div class="card p-4 shadow">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="name" class="form-label">Unit Name</label>
+                    <input type="text" name="name" id="name" class="form-control" required>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success">Add Unit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block admin %}
+<div class="container py-4">
+  <h4>Create Offer</h4>
+
+  <form id="offer-form" method="post" class="card p-3" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label small">Offer Title</label>
+      <input name="title" id="offer-title" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label small">Description</label>
+      <textarea name="description" rows="3" class="form-control"></textarea>
+    </div>
+
+    <div class="row g-2 mb-3">
+      <div class="col-sm-6">
+        <label class="form-label small">Start Date</label>
+        <input type="date" name="start_date" id="offer-start" class="form-control" required>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label small">Start Time (optional)</label>
+        <input type="time" name="start_time" id="offer-start-time" class="form-control">
+      </div>
+      <div class="col-sm-6 mt-2">
+        <label class="form-label small">End Date</label>
+        <input type="date" name="end_date" id="offer-end" class="form-control" required>
+      </div>
+      <div class="col-sm-6 mt-2">
+        <label class="form-label small">End Time (optional)</label>
+        <input type="time" name="end_time" id="offer-end-time" class="form-control">
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Product search -->
+    <div class="mb-2">
+      <label class="form-label small">Search product to add</label>
+      <div style="position:relative;">
+        <input id="admin-product-search" type="text" class="form-control" placeholder="Type product name..." autocomplete="off">
+        <div id="admin-product-results" class="list-group position-absolute w-100" style="z-index:1200; max-height:260px; overflow:auto; display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Selected badges -->
+    <div id="selected-list" class="mb-3" aria-live="polite"></div>
+
+    <!-- Hidden inputs will be appended here before submit -->
+    <div id="hidden-inputs"></div>
+
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-primary">Create Offer</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function(){
+  const searchInput = document.getElementById('admin-product-search');
+  const resultsBox = document.getElementById('admin-product-results');
+  const selectedList = document.getElementById('selected-list');
+  const hiddenInputs = document.getElementById('hidden-inputs');
+  const endpoint = "{% url 'product_search' %}";
+
+  const selected = {}; // product_id => {id,title,image,price,offer_price}
+
+  function renderSelected() {
+    selectedList.innerHTML = '';
+    hiddenInputs.innerHTML = '';
+    Object.values(selected).forEach(item => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'd-inline-flex align-items-center border rounded p-2 me-2 mb-2';
+      wrapper.style.gap = '8px';
+      wrapper.style.maxWidth = '100%';
+      wrapper.style.flexWrap = 'nowrap';
+
+      const txt = document.createElement('div');
+      txt.innerHTML = `<strong style="display:block;min-width:160px">${item.title}</strong>
+                       <small class="text-muted">Current: ₹${item.price}</small>`;
+      wrapper.appendChild(txt);
+
+      const priceInput = document.createElement('input');
+      priceInput.type = 'number';
+      priceInput.step = '0.01';
+      priceInput.min = '0';
+      priceInput.value = item.offer_price || item.price;
+      priceInput.className = 'form-control form-control-sm';
+      priceInput.style.width = '110px';
+      priceInput.title = 'Offer price';
+      priceInput.addEventListener('change', () => {
+        selected[item.id].offer_price = priceInput.value;
+        const hv = document.getElementById('offer_price_' + item.id);
+        if (hv) hv.value = priceInput.value;
+      });
+      wrapper.appendChild(priceInput);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn btn-sm btn-outline-danger';
+      removeBtn.innerText = '×';
+      removeBtn.title = 'Remove';
+      removeBtn.addEventListener('click', () => {
+        delete selected[item.id];
+        renderSelected();
+      });
+      wrapper.appendChild(removeBtn);
+
+      selectedList.appendChild(wrapper);
+
+      const h1 = document.createElement('input');
+      h1.type = 'hidden';
+      h1.name = 'product_id[]';
+      h1.value = item.id;
+      h1.id = 'product_id_' + item.id;
+      hiddenInputs.appendChild(h1);
+
+      const h2 = document.createElement('input');
+      h2.type = 'hidden';
+      h2.name = 'offer_price[]';
+      h2.value = item.offer_price || item.price;
+      h2.id = 'offer_price_' + item.id;
+      hiddenInputs.appendChild(h2);
+    });
+  }
+
+  let timer = null;
+  searchInput.addEventListener('input', function() {
+    const q = this.value.trim();
+    if (timer) clearTimeout(timer);
+    resultsBox.style.display = 'none';
+    resultsBox.innerHTML = '';
+    if (!q) return;
+    timer = setTimeout(() => {
+      fetch(endpoint + '?q=' + encodeURIComponent(q))
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          resultsBox.innerHTML = '';
+          if (!data.results || data.results.length === 0) {
+            resultsBox.innerHTML = '<div class="list-group-item small text-muted">No results</div>';
+          } else {
+            data.results.forEach(p => {
+              const a = document.createElement('a');
+              a.href = '#';
+              a.className = 'list-group-item list-group-item-action d-flex align-items-center';
+              a.innerHTML = `<div style="flex:1;min-width:0;">
+                               <strong>${p.title}</strong>
+                               <div class="small text-muted">₹${p.price} ${p.unit ? '/'+p.unit : ''}</div>
+                            </div>
+                            <div class="text-success fw-bold ms-2">Add</div>`;
+              a.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                if (!selected[p.id]) {
+                  selected[p.id] = { id: p.id, title: p.title, image: p.image || '', price: p.price, offer_price: p.price };
+                  renderSelected();
+                }
+                searchInput.value = '';
+                resultsBox.style.display = 'none';
+              });
+              resultsBox.appendChild(a);
+            });
+          }
+          resultsBox.style.display = 'block';
+        })
+        .catch(() => {
+          resultsBox.innerHTML = '<div class="list-group-item small text-danger">Search error</div>';
+          resultsBox.style.display = 'block';
+        });
+    }, 220);
+  });
+
+  document.addEventListener('click', function(ev){
+    if (!searchInput.contains(ev.target) && !resultsBox.contains(ev.target)) resultsBox.style.display = 'none';
+  });
+
+  const startEl = document.getElementById('offer-start');
+  const endEl = document.getElementById('offer-end');
+  const today = new Date().toISOString().slice(0,10);
+  if (startEl && !startEl.value) startEl.value = today;
+  if (endEl && !endEl.value) endEl.value = today;
+
+  const form = document.getElementById('offer-form');
+  form.addEventListener('submit', function(ev){
+    if (Object.keys(selected).length === 0) {
+      ev.preventDefault();
+      alert('Please add at least one product to the offer.');
+      return false;
+    }
+    return true;
+  });
+})();
+</script>
+{% endblock %}

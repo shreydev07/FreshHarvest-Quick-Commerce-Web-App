@@ -1,0 +1,131 @@
+{% extends 'userbase.html' %}
+{% load static %}
+{% block user %}
+
+<style>
+  .cart-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .cart-title {
+    font-size:1.6rem;
+    font-weight:700;
+    color:#116530;
+    letter-spacing:0.2px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .cart-title .dot {
+    width:10px;
+    height:10px;
+    background:#28a745;
+    border-radius:50%;
+    box-shadow:0 4px 12px rgba(40,167,69,0.15);
+  }
+  .btn-products { min-width:140px; }
+  @media (max-width:576px){
+    .cart-header { flex-direction:column; align-items:flex-start; gap:8px; }
+    .btn-products { width:100%; }
+  }
+  .qty-small { font-weight:600; color:#234b3a; }
+  .unit-note { color:#6b8f78; font-size:0.9rem; }
+</style>
+
+<div class="row mt-4s mt-4">
+  <div class="col-sm-12">
+    <div class="cart-header">
+      <div class="cart-title">
+        <span class="dot" aria-hidden="true"></span>
+        <span>My Cart</span>
+      </div>
+      <div>
+        <a href="{% url 'products' %}" class="btn btn-outline-success btn-products">Products</a>
+      </div>
+    </div>
+
+    {% if items %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Product Name</th>
+            <th>Cover Image</th>
+            <th>Product Category</th>
+            <th>Quantity</th>
+            <th>Price per unit</th>
+            <th>Total Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in items %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ i.product.title }}</td>
+            <td>
+              {% if i.product.cover_image %}
+                <img src="{{ i.product.cover_image.url }}" height="70" class="rounded">
+              {% else %}
+                No Image
+              {% endif %}
+            </td>
+            <td>{{ i.product.category.name }}</td>
+
+            <td>
+              {% with base_qty=i.quantity %}
+                <span class="qty-small">{{ base_qty|floatformat:3 }}</span>
+                <span class="unit-note">{{ i.product.unit.name|default:"unit" }}</span>
+                {% if i.variant %}
+                  <span class="unit-note"> ({{ i.variant.name }})</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+
+            <td>
+              {% if i.display_per_unit %}
+                &#8377; {{ i.display_per_unit|floatformat:2 }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+
+            <td class="fw-bold text-success">
+              {% if i.display_line_total %}
+                &#8377; {{ i.display_line_total|floatformat:2 }}
+              {% else %}
+                &#8377; 0.00
+              {% endif %}
+            </td>
+
+            <td>
+              <a href="{% url 'removeitem' id=i.product.id %}" class="btn btn-danger btn-sm">Remove</a>
+            </td>
+          </tr>
+          {% endfor %}
+
+          <tr>
+            <td colspan="6" class="text-end">
+              <h4>Total Price : &#8377; {{ total|floatformat:2 }}</h4>
+            </td>
+            <td colspan="2">
+              <a href="{% url 'checkout' %}" class="btn btn-success">Proceed To Payment</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <p class="mb-3">Your cart is empty</p>
+      <a href="{% url 'products' %}" class="btn btn-success">Continue Shopping</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

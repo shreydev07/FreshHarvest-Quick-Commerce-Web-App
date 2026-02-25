@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Invoice #{{ order.id }}</title>
+  <style>
+    body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color:#0b1b12; margin:0; padding:24px; }
+    .wrap { max-width:800px; margin:0 auto; border:1px solid #eef6f0; padding:26px; border-radius:6px; }
+    .brand { display:flex; align-items:center; gap:16px; }
+    .brand img { height:54px; }
+    .brand h2 { margin:0; color:#0b3a2d; font-size:20px; }
+    .meta { margin-top:12px; display:flex; justify-content:space-between; gap:12px; }
+    .meta .left, .meta .right { font-size:13px; color:#3f4a41; }
+    table { width:100%; border-collapse:collapse; margin-top:18px; font-size:13px; }
+    table thead th { text-align:left; padding:10px 8px; background:#f4fbf6; color:#0b3a2d; border-bottom:1px solid #e6efe9; }
+    table tbody td { padding:10px 8px; border-bottom:1px dashed #e9f2ea; }
+    tfoot td { padding:10px 8px; font-weight:700; }
+    .right { text-align:right; }
+    .muted { color:#6b7280; font-size:12px; }
+    .note { margin-top:16px; font-size:12px; color:#37523f; }
+    .footer { margin-top:22px; font-size:12px; color:#6b7280; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <div>
+        <img src="{{ logo_url }}" alt="logo"/>
+      </div>
+      <div>
+        <h2>{{ site_name }}</h2>
+        <div class="muted">Invoice #: {{ order.id }}</div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div class="left">
+        <div><strong>Billed to</strong></div>
+        <div>{{ user.name }}</div>
+        <div class="muted">{{ user.email }}</div>
+        {% if user.contactno %}<div class="muted">{{ user.contactno }}</div>{% endif %}
+        {% if user.address %}<div class="muted">{{ user.address }}</div>{% endif %}
+      </div>
+      <div class="right">
+        <div><strong>Invoice date</strong></div>
+        <div>{{ now|date:"d M Y" }}</div>
+        <div style="margin-top:10px;"><strong>Order ID</strong></div>
+        <div>#{{ order.id }}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="right">Unit price (₹)</th>
+          <th class="right">Quantity</th>
+          <th class="right">Total (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td>
+            <div><strong>{{ it.product.title }}</strong></div>
+            {% if it.variant %}<div class="muted">{{ it.variant.name }}</div>{% endif %}
+          </td>
+          <td class="right">{{ it.price }}</td>
+          <td class="right">{{ it.quantity }}</td>
+          <td class="right">₹{{ it.price|floatformat:2|floatformat:""|add:"0"|default:it.quantity|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" class="right">Subtotal</td>
+          <td class="right">₹{{ order.total_amount }}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="note">
+      Thank you for shopping with {{ site_name }}. This invoice is computer generated and does not require a signature.
+    </div>
+
+    <div class="footer">
+      {{ site_name }} · Trusted groceries delivery · <span class="muted">support@freshharvest.example</span>
+    </div>
+  </div>
+</body>
+</html>

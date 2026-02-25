@@ -1,0 +1,200 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block admin %}
+<div class="row">
+    <div class="col-sm-12 mt-4">
+        <h3 class="text-center text-success">Subscribed Emails</h3>
+    </div>
+    <div class="col-sm-9 mx-auto mt-4 ">
+        <div class="card p-4 shadow">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Subscribed At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                                {% for sub in page_obj %}
+                                        <tr>
+                                                <td>{{ sub.email }}</td>
+                                                <td>{{ sub.subscribed_at }}</td>
+                                                <td>
+                                                        <a href="{% url 'delete_subscriber' sub.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                                        <button type="button" class="btn btn-primary btn-sm" onclick="openCompose('{{ sub.email }}', {{ sub.id }})">Send Note</button>
+                                                </td>
+                                        </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No subscribers found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+        {% if is_paginated %}
+        <div class="col-sm-9 mx-auto mt-3">
+            <nav aria-label="Subscribers pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                        {% elif num <= 2 or num > paginator.num_pages|add:'-2' or num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif forloop.first or forloop.last %}
+                            {# skip - handled above #}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+            </table>
+        </div>
+    </div>
+        <!-- Compose Modal (single instance) -->
+        <div class="modal fade" id="composeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Compose Email</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="composeForm">
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            <input type="hidden" name="template" id="templateField" value="">
+                            <div id="composeAlert"></div>
+
+                            <div class="mb-2">
+                                <label class="form-label">To</label>
+                                <input type="email" name="to" id="toField" class="form-control" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Subject</label>
+                                <input type="text" name="subject" id="subjectField" class="form-control">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Body</label>
+                                <textarea name="body" id="bodyField" class="form-control" rows="6"></textarea>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Attachments</label>
+                                <input type="file" name="attachments" id="attachmentsField" class="form-control" multiple>
+                            </div>
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="useWelcomeBtn">Use Welcome Template</button>
+                                <small class="text-muted ms-2">(Autofill subject & send using the newsletter HTML template)</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button id="sendBtn" type="submit" class="btn btn-primary">Send</button>
+                                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize modal and handlers after DOM is ready. Create Bootstrap modal on-demand
+            document.addEventListener('DOMContentLoaded', function(){
+                const composeModalEl = document.getElementById('composeModal')
+                let composeModal = null
+
+                function ensureModal() {
+                    if (!composeModal && composeModalEl && window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                        composeModal = new bootstrap.Modal(composeModalEl)
+                    }
+                    return composeModal
+                }
+
+                // expose openCompose globally
+                window.openCompose = function(email, id){
+                    const form = document.getElementById('composeForm')
+                    if(form) form.reset()
+                    const toF = document.getElementById('toField')
+                    const tplF = document.getElementById('templateField')
+                    const alertF = document.getElementById('composeAlert')
+                    if(toF) toF.value = email || ''
+                    if(tplF) tplF.value = ''
+                    if(alertF) alertF.innerHTML = ''
+
+                    const m = ensureModal()
+                    if (m) {
+                        m.show()
+                    } else {
+                        // fallback: if Bootstrap isn't ready yet, retry shortly
+                        setTimeout(function(){
+                            const m2 = ensureModal()
+                            if (m2) m2.show()
+                            else if (alertF) alertF.innerHTML = '<div class="alert alert-warning">Modal unavailable (Bootstrap not loaded).</div>'
+                        }, 300)
+                    }
+                }
+
+                const useWelcomeBtn = document.getElementById('useWelcomeBtn')
+                if(useWelcomeBtn){
+                    useWelcomeBtn.addEventListener('click', function(){
+                        const to = document.getElementById('toField')?.value || ''
+                        const name = (to.split('@')[0] || '').replace(/\./g,' ').replace(/\_/g,' ').replace(/\d+/g,' ').trim()
+                        const brand = 'FreshHarvest'
+                        const tplF = document.getElementById('templateField')
+                        const subjF = document.getElementById('subjectField')
+                        const bodyF = document.getElementById('bodyField')
+                        if(tplF) tplF.value = 'welcome'
+                        if(subjF) subjF.value = `Welcome to ${brand} — Thanks for subscribing`
+                        if(bodyF) bodyF.value = `Hi ${name || 'there'},\n\nThank you for subscribing to our newsletter! We’re excited to have you.\n\nBest,\n${brand}`
+                    })
+                }
+
+                const composeForm = document.getElementById('composeForm')
+                if(composeForm){
+                    composeForm.addEventListener('submit', function(e){
+                        e.preventDefault()
+                        const form = e.target
+                        const sendBtn = document.getElementById('sendBtn')
+                        if(sendBtn){ sendBtn.disabled = true; sendBtn.innerHTML = 'Sending...'; }
+                        const url = "{% url 'send_note' %}"
+                        const fd = new FormData(form)
+                        const attachments = document.getElementById('attachmentsField')
+                        if(attachments){
+                            for (let i=0;i<attachments.files.length;i++){
+                                fd.append('attachments', attachments.files[i])
+                            }
+                        }
+
+                        fetch(url, {
+                            method: 'POST',
+                            body: fd,
+                            credentials: 'same-origin'
+                        }).then(r=>r.json()).then(data=>{
+                            const alertEl = document.getElementById('composeAlert')
+                            if(data.success){
+                                if(alertEl) alertEl.innerHTML = '<div class="alert alert-success">Email sent successfully.</div>'
+                                setTimeout(function(){ const m = ensureModal(); if(m) m.hide(); if(sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='Send'; } }, 900)
+                            } else {
+                                if(alertEl) alertEl.innerHTML = `<div class="alert alert-danger">Error: ${data.error || 'Failed to send'}</div>`
+                                if(sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='Send'; }
+                            }
+                        }).catch(err=>{
+                            const alertEl = document.getElementById('composeAlert')
+                            if(alertEl) alertEl.innerHTML = `<div class="alert alert-danger">Network error</div>`
+                            if(sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='Send'; }
+                        })
+                    })
+                }
+            })
+        </script>
+        {% endblock %}

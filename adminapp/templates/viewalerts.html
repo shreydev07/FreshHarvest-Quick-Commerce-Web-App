@@ -1,0 +1,28 @@
+{% extends "adminbase.html" %}
+{% block admin %}
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-3">
+    <h4 class="mb-0">All Stock Alerts</h4>
+    <div class="ms-auto">
+      <a href="{% url 'checkstock' %}" class="btn btn-outline-secondary">Back to Stock</a>
+    </div>
+  </div>
+
+  <div class="list-group">
+    {% for a in alerts %}
+      {# Use a.page if view provided it; otherwise fallback to 1 #}
+      {% with page_val=a.page|default:"1" %}
+        <a href="{% url 'checkstock' %}?page={{ page_val }}&scroll_to={{ a.product.id }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-bold">{{ a.product.title }}</div>
+            <div class="small text-muted">{{ a.message }}</div>
+          </div>
+          <div class="small text-muted">{{ a.created_at|date:"d M Y, H:i" }}</div>
+        </a>
+      {% endwith %}
+    {% empty %}
+      <div class="list-group-item small text-muted">No alerts.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

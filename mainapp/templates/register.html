@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register{% endblock %}
+
+{% block main %}
+<style>
+  /* Professional gradient background for register page */
+  html {
+    background: linear-gradient(135deg, #ffffff 0%, #e0d2d2 15%, #c1dfc3 35%, #c8e6c9 60%, #a5d6a7 85%, #f5f5f5 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  body {
+    background: transparent;
+    min-height: 100%;
+  }
+
+  .register-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .reg-card {
+    width: 100%;
+    max-width: 720px;
+    background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    box-shadow: 0 14px 40px rgba(18,66,26,0.08);
+    padding: 28px;
+    border: 1px solid rgba(40,167,69,0.06);
+    backdrop-filter: blur(8px);
+  }
+  .reg-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .reg-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e9f6ec, #dff7e6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--bs-success);
+  }
+  .reg-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--bs-success);
+    margin: 0;
+  }
+  .form-row {
+    margin-bottom: 12px;
+  }
+  .form-control.custom {
+    height: 48px;
+    border-radius: 10px;
+    box-shadow: none;
+    border: 1px solid rgba(40,167,69,0.12);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .form-control.custom:focus {
+    border-color: var(--bs-success);
+    box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.15);
+  }
+  .form-text.error {
+    color: #c72b2b;
+    font-size: 0.88rem;
+    margin-top: 6px;
+    display: none;
+  }
+  .help-small {
+    font-size: 0.86rem;
+    color: #6c757d;
+    margin-top: 6px;
+  }
+  .btn-primary.custom {
+    background: linear-gradient(90deg, #2e7d32, #28a745);
+    border: 0;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-primary.custom:hover,
+  .btn-primary.custom:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40,167,69,0.25);
+  }
+  .captcha-wrap {
+    margin: 10px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .field-inline {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pw-req {
+    font-size: 0.84rem;
+    color: #6c757d;
+    margin-top: 6px;
+  }
+  .invalid {
+    border-color: #c72b2b !important;
+  }
+  @media (max-width: 576px) {
+    .reg-card {
+      padding: 18px;
+    }
+    .reg-header {
+      gap: 10px;
+    }
+  }
+</style>
+
+<div class="register-page">
+  <div class="reg-card">
+    <div class="reg-header">
+      <div class="reg-logo">
+        <i class="fas fa-leaf"></i>
+      </div>
+      <div>
+        <h2 class="reg-title">Create your account</h2>
+        <div class="help-small">Join FreshHarvest — fresh produce delivered to your door.</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 col-md-10 mx-auto">
+        {% if messages %}
+          {% for m in messages %}
+            <div class="alert alert-{{ m.tags|default:'success' }} alert-dismissible fade show" role="alert">
+              {{ m }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post" id="register-form" novalidate>
+          {% csrf_token %}
+
+          <div class="form-row">
+            <input type="text" name="name" placeholder="Full name" class="form-control custom" required>
+            <div class="form-text error" id="error-name">Please enter your full name.</div>
+          </div>
+
+          <div class="form-row">
+            <input type="email" name="email" placeholder="Email address" class="form-control custom" required>
+            <div class="form-text error" id="error-email">Please enter a valid email address.</div>
+          </div>
+
+          <div class="form-row">
+            <input type="text" name="contactno" placeholder="Phone number" class="form-control custom" inputmode="numeric" pattern="\d*" required>
+            <div class="form-text error" id="error-contact">Phone number must be numeric and at least 10 digits.</div>
+          </div>
+
+          <div class="form-row">
+            <input type="password" name="password" placeholder="Password" class="form-control custom" required>
+            <div class="pw-req">Password must be at least 8 characters.</div>
+            <div class="form-text error" id="error-password">Password must be 8 or more characters.</div>
+          </div>
+
+          <div class="form-row">
+            <input type="password" name="cpassword" placeholder="Confirm password" class="form-control custom" required>
+            <div class="form-text error" id="error-cpassword">Passwords do not match.</div>
+          </div>
+
+          <!-- Google reCAPTCHA v2 checkbox -->
+           <div class="form-row captcha-wrap">
+            <div class="g-recaptcha" data-sitekey="{{RECAPTCHA_SITE_KEY}}"></div>
+            <div class="form-text error" id="error-captcha">Please verify that you are not a robot.</div>
+          </div> 
+
+          <div class="form-row mt-3">
+            <input type="submit" value="Register Now" class="btn btn-primary custom w-100">
+          </div>
+        </form>
+
+        <div class="text-center mt-3">
+          <small class="text-muted">By registering you agree to our <a href="">Terms</a> & <a href="">Privacy Policy</a>.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById('register-form');
+  const getEl = id => document.getElementById(id);
+  const showErr = (el, msgId) => { if(el) el.classList.add('invalid'); if (msgId) getEl(msgId).style.display = 'block'; };
+  const clearErr = (el, msgId) => { if(el) el.classList.remove('invalid'); if (msgId) getEl(msgId).style.display = 'none'; };
+
+  // hide all error messages initially
+  ['error-name','error-email','error-contact','error-password','error-cpassword','error-captcha'].forEach(id=>{
+    const e = getEl(id); if (e) e.style.display = 'none';
+  });
+
+  if (form) {
+    form.addEventListener('submit', function(ev){
+      let valid = true;
+
+      const name = form.querySelector('[name="name"]');
+      const email = form.querySelector('[name="email"]');
+      const contact = form.querySelector('[name="contactno"]');
+      const pwd = form.querySelector('[name="password"]');
+      const cpwd = form.querySelector('[name="cpassword"]');
+
+      // validations
+      if (!name.value.trim()) { showErr(name,'error-name'); valid = false; } else clearErr(name,'error-name');
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(email.value.trim())) { showErr(email,'error-email'); valid = false; } else clearErr(email,'error-email');
+      const contactValue = contact.value.replace(/\D/g,'');
+      if (contactValue.length < 10) { showErr(contact,'error-contact'); valid = false; } else clearErr(contact,'error-contact');
+      if (pwd.value.length < 8) { showErr(pwd,'error-password'); valid = false; } else clearErr(pwd,'error-password');
+      if (cpwd.value !== pwd.value) { showErr(cpwd,'error-cpassword'); valid = false; } else clearErr(cpwd,'error-cpassword');
+
+      // reCAPTCHA validation
+      if (grecaptcha.getResponse().length === 0) {
+        const err = getEl('error-captcha'); if (err) err.style.display = 'block';
+        valid = false;
+      } else {
+        const err = getEl('error-captcha'); if (err) err.style.display = 'none';
+      }
+
+      if (!valid) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        return false;
+      }
+      return true;
+    });
+
+    // clear error on input
+    ['name','email','contactno','password','cpassword'].forEach(n=>{
+      const el = form.querySelector('[name="'+n+'"]');
+      el.addEventListener('input', ()=>{
+        el.classList.remove('invalid');
+        const map = {name:'error-name',email:'error-email',contactno:'error-contact',password:'error-password',cpassword:'error-cpassword'};
+        const m = map[n];
+        if (m) { const me = getEl(m); if (me) me.style.display = 'none'; }
+      });
+    });
+  }
+})();
+</script>
+
+<!-- Google reCAPTCHA API -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+{% endblock %}

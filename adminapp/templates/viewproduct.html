@@ -1,0 +1,518 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+{% block admin %}
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col">
+      <h3 class="mb-0">Products</h3>
+    </div>
+  </div>
+
+  
+
+  <div class="row">
+    <div class="col">
+      <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Unit</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Capacity</th>
+              <th>Image</th>
+              <th>Added</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in products %}
+            <tr>
+              <td class="align-middle">{{ forloop.counter }}</td>
+              <td class="align-middle">{{ b.title }}</td>
+              <td class="align-middle">{{ b.category.name }}</td>
+              <td class="align-middle">{{ b.unit.name }}</td>
+              <td class="align-middle">₹ {{ b.price }}</td>
+              <td class="align-middle">{{ b.stock }} {{b.unit.name}}</td>
+              <td class="align-middle">{{ b.max_stock }} {{b.unit.name}}</td>
+              <td class="align-middle">
+                {% if b.cover_image %}
+                <img src="{{ b.cover_image.url }}" alt="cover" class="img-thumbnail" style="height:70px;">
+                {% else %}
+                <span class="text-muted small">No image</span>
+                {% endif %}
+              </td>
+              <td class="align-middle">{{ b.created_at|date:"Y-m-d H:i" }}</td>
+              <td class="align-middle text-center">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary edit-btn"
+                  data-action="{% url 'editproduct' b.id %}"
+                  data-id="{{ b.id }}"
+                  data-title="{{ b.title|escapejs }}"
+                  data-category="{{ b.category.id|default_if_none:'' }}"
+                  data-unit="{{ b.unit.id|default_if_none:'' }}"
+                  data-original="{{ b.original_price|default_if_none:'' }}"
+                  data-price="{{ b.price|default_if_none:'' }}"
+                  data-stock="{{ b.stock|default_if_none:'' }}"
+                  data-max_stock="{{ b.max_stock|default_if_none:'' }}"
+                  data-subqty="{{ b.subquantity_enabled|yesno:'true,false' }}"
+                  data-published="{{ b.published_date|date:'Y-m-d' }}"
+                  data-description="{{ b.description|default_if_none:''|escapejs }}"
+                  data-image="{% if b.cover_image %}{{ b.cover_image.url }}{% endif %}"
+                  title="Edit product">
+                  <i class="ti ti-edit"></i>
+                </button>
+
+                <form method="post" action="{% url 'deleteproduct' b.id %}" style="display:inline" onsubmit="return confirm('Delete this product?');">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit" title="Delete product">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFESSIONAL EDIT MODAL -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title mb-0">Edit Product</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="editProductForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="product_id" id="edit-product-id">
+
+        <div class="modal-body">
+          <div class="row gx-3">
+            <div class="col-lg-8">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Title</label>
+                  <input type="text" name="title" id="edit-title" class="form-control" required>
+                  <div class="invalid-feedback">Title is required.</div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Category</label>
+                  <select name="category" id="edit-category" class="form-select">
+                    <option value="">-- Select Category --</option>
+                    {% for c in cats %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Unit</label>
+                  <select name="unit" id="edit-unit" class="form-select">
+                    <option value="">-- Select Unit --</option>
+                    {% for u in units %}
+                    <option value="{{ u.id }}">{{ u.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Published Date</label>
+                  <input type="date" name="published_date" id="edit-published-date" class="form-control">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Original Price</label>
+                  <input type="number" step="0.01" name="original_price" id="edit-original-price" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Price</label>
+                  <input type="number" step="0.01" name="price" id="edit-price" class="form-control" required>
+                  <div class="invalid-feedback">Price is required.</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Stock</label>
+                  <input type="number" name="stock" id="edit-stock" class="form-control" min="0" step="0.001">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Max Capacity</label>
+                  <input type="number" name="max_stock" id="edit-max-stock" class="form-control" min="0" step="0.001">
+                </div>
+
+                
+
+                <div class="col-12 mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea name="description" id="edit-description" class="form-control" rows="4"></textarea>
+                </div>
+
+                <!-- Add Subunit button (inside edit-product modal form) -->
+                <div class="mb-3">
+                  <label class="form-label">Product Sub-quantities</label>
+                  <div class="small text-muted mb-2">Manage per-product subunits (e.g. "250g" → 0.25 kg). Use the button to open a focused submodal for add/edit.</div>
+
+                  <div id="subqty-inline-area" class="mb-2">
+                    <table class="table table-sm mb-0">
+                     
+                      <tbody id="subqty-tbody"><!-- rows populated by edit-button JS --></tbody>
+                    </table>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <button type="button" id="openProductSubunitsModal" class="btn btn-sm btn-secondary">Add / Manage Subunits</button>
+                    <small class="text-muted align-self-center ms-2">Open the subunit dialog to add or edit product-specific subunits.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="card border-0">
+                <div class="card-body">
+                  <label class="form-label">Cover Image</label>
+                  <div class="mb-3">
+                    <div id="current-image-preview" class="border rounded p-2 text-center" style="min-height:120px; display:flex; align-items:center; justify-content:center;">
+                      <span class="text-muted small">No Image</span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <input type="file" name="cover_image" id="edit-cover-image" class="form-control">
+                    <small class="text-muted">Choose an image to replace current cover.</small>
+                  </div>
+
+                  <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success">Save changes</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div> <!-- end right column -->
+          </div> <!-- end row -->
+        </div> <!-- end modal-body -->
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Nested modal: Product Subunits Modal -->
+<div class="modal fade" id="productSubunitsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form id="product-subunits-form" method="post" action="">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Manage Subunits for <span id="product-sub-title"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted">Add subunits (e.g. "250g" -> factor 0.25). Factor autocalculates from the name you type.</p>
+          <table class="table table-sm">
+            <thead><tr><th>Name</th><th>Factor (kg)</th><th>Price (optional)</th><th></th></tr></thead>
+            <tbody id="product-subtbody"></tbody>
+          </table>
+          <button type="button" id="product-add-subrow" class="btn btn-sm btn-outline-primary">Add row</button>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" type="submit">Save Subunits</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Helper to show bootstrap modal
+  function showBootstrapModal(el) {
+    if (!el) return;
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(el).show();
+    } else if (window.jQuery && jQuery.fn.modal) {
+      jQuery(el).modal('show');
+    } else {
+      el.style.display = 'block';
+      el.classList.add('show');
+    }
+  }
+
+  // Helper to hide modal
+  function hideBootstrapModal(el) {
+    if (!el) return;
+    if (window.bootstrap && bootstrap.Modal) {
+      const inst = bootstrap.Modal.getInstance(el);
+      if (inst) inst.hide();
+    } else if (window.jQuery && jQuery.fn.modal) {
+      jQuery(el).modal('hide');
+    } else {
+      el.style.display = 'none';
+      el.classList.remove('show');
+    }
+  }
+
+  // Local helper used to add rows into a specific tbody (keeps scope local)
+  function addSubqtyRowTo(tbody, id='', name='', factor='', price='') {
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="form-control form-control-sm sub-name" name="sub_name[]" value="${name||''}" /></td>
+      <td><input type="number" step="0.000001" class="form-control form-control-sm sub-factor" name="sub_factor[]" value="${factor||''}" /></td>
+      <td><input type="number" step="0.01" class="form-control form-control-sm sub-price" name="sub_price[]" value="${price||''}" /></td>
+      <td style="width:80px;">
+        <input type="hidden" name="sub_id[]" value="${id||''}" class="sub-id" />
+        <button type="button" class="btn btn-sm btn-danger remove-sub">Remove</button>
+      </td>`;
+    tbody.appendChild(tr);
+    tr.querySelector('.remove-sub')?.addEventListener('click', function(){ tr.remove(); });
+    // auto-calc factor when name typed (simple local handler)
+    const nameInput = tr.querySelector('.sub-name');
+    const factorInput = tr.querySelector('.sub-factor');
+    nameInput?.addEventListener('input', function(){
+      const txt = (this.value||'').toString().toLowerCase().trim();
+      const m = txt.match(/([\d,.\/]+)\s*(kg|g|gm|grams|ltr|liter|litre)?/);
+      let fv = '';
+      if (m) {
+        let numStr = m[1].replace(',','');
+        if (numStr.indexOf('/') !== -1) {
+          const parts = numStr.split('/');
+          if (parts.length===2) numStr = (parseFloat(parts[0]) / parseFloat(parts[1])).toString();
+        }
+        let num = parseFloat(numStr) || 0;
+        const unit = m[2] || '';
+        if (unit.indexOf('kg') !== -1) fv = (''+num);
+        else if (unit.indexOf('l') !== -1) fv = (''+num);
+        else fv = ('' + (num/1000));
+      } else {
+        const num = parseFloat(txt.replace(',','')) || 0;
+        if (num > 0 && num < 10) fv = (''+num);
+        else if (num > 0) fv = ('' + (num/1000));
+      }
+      if (fv !== '') factorInput.value = fv;
+    });
+  }
+
+  // Get modal elements (scoped)
+  const editModal = document.getElementById('editProductModal');
+  const editForm = editModal ? editModal.querySelector('#editProductForm') : document.getElementById('editProductForm');
+
+  // Attach click handlers to all edit buttons (delegation not necessary here)
+  document.querySelectorAll('.edit-btn').forEach(function(btn){
+    btn.addEventListener('click', function () {
+      try {
+        // Fill form action and hidden id
+        const action = btn.dataset.action || btn.getAttribute('data-action');
+        const pid = btn.dataset.id || btn.getAttribute('data-id');
+
+        if (!editForm) {
+          console.error('Edit form not found');
+          return;
+        }
+        if (action) editForm.action = action;
+        if (editModal) {
+          const idEl = editModal.querySelector('#edit-product-id');
+          if (idEl) idEl.value = pid || '';
+        } else {
+          const idEl = document.getElementById('edit-product-id');
+          if (idEl) idEl.value = pid || '';
+        }
+
+        // Fill fields inside the modal specifically (use editModal.querySelector to avoid duplicate-id collisions)
+        function q(sel){ return (editModal || document).querySelector(sel); }
+        if (q('#edit-title')) q('#edit-title').value = btn.dataset.title || '';
+        if (q('#edit-category')) q('#edit-category').value = btn.dataset.category || '';
+        if (q('#edit-unit')) q('#edit-unit').value = btn.dataset.unit || '';
+        if (q('#edit-original-price')) q('#edit-original-price').value = btn.dataset.original || '';
+        if (q('#edit-price')) q('#edit-price').value = btn.dataset.price || '';
+        if (q('#edit-stock')) q('#edit-stock').value = btn.dataset.stock || '';
+        if (q('#edit-max-stock')) q('#edit-max-stock').value = btn.dataset.max_stock || '';
+        if (q('#edit-description')) q('#edit-description').value = btn.dataset.description || '';
+        if (q('#edit-published-date')) q('#edit-published-date').value = btn.dataset.published || '';
+
+        
+        // Image preview
+        const imgUrl = btn.dataset.image || '';
+        const preview = editModal ? editModal.querySelector('#current-image-preview') : document.getElementById('current-image-preview');
+        if (preview) preview.innerHTML = imgUrl ? `<img src="${imgUrl}" alt="current" style="max-width:100%; max-height:180px; object-fit:contain;">` : '<span class="text-muted small">No Image</span>';
+
+        // Clear file input if present
+        const fileInput = editModal ? editModal.querySelector('#edit-cover-image') : document.getElementById('edit-cover-image');
+        if (fileInput) fileInput.value = '';
+
+        // Populate per-product subquantities inside the modal's subqty tbody (use modal-local tbody)
+        const tbody = editModal ? editModal.querySelector('#subqty-tbody') : document.getElementById('subqty-tbody');
+        if (tbody) tbody.innerHTML = '';
+        if (pid) {
+          fetch(`/adminapp/product/${pid}/subquantities/`, { credentials: 'same-origin' })
+            .then(r => r.ok ? r.json() : { results: [] })
+            .then(data => {
+              (data.results || []).forEach(sq => addSubqtyRowTo(tbody, sq.id, sq.name, sq.factor_to_base, sq.price));
+            }).catch(err => {
+              console.warn('Failed to load product subquantities', err);
+            });
+        }
+
+        // Load unit-level subunits for the selected unit into a unit-subunits list if present (use modal-local container if exists)
+        const unitId = btn.dataset.unit || '';
+        const unitListEl = document.getElementById('unit-subunits-list');
+        if (unitListEl && unitId) {
+          unitListEl.innerHTML = '<div class="small text-muted">Loading...</div>';
+          fetch(`/adminapp/unit/${unitId}/subunits/`, { credentials:'same-origin' })
+            .then(r => r.ok ? r.json() : { results: [] })
+            .then(data => {
+              unitListEl.innerHTML = '';
+              const existingNames = Array.from((editModal || document).querySelectorAll('#subqty-tbody .sub-name')).map(i => i.value.trim());
+              (data.results || []).forEach(s => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'form-check';
+                wrapper.innerHTML = `<input class="form-check-input unit-sub-checkbox" type="checkbox" value="${s.id}" id="unitsub-${s.id}" data-name="${s.name}" data-factor="${s.factor_to_base}" data-price="${s.price||''}">
+                                     <label class="form-check-label" for="unitsub-${s.id}">${s.name} (${s.factor_to_base}) ${s.price? ' - ₹'+s.price:''}</label>`;
+                unitListEl.appendChild(wrapper);
+              });
+              // mark checked where name matches existing product subqty
+              document.querySelectorAll('.unit-sub-checkbox').forEach(cb=>{
+                const nm = cb.dataset.name || '';
+                if (existingNames.indexOf(nm.trim()) !== -1) cb.checked = true;
+              });
+            }).catch(()=>{ unitListEl.innerHTML = '<div class="small text-danger">Failed to load</div>'; });
+        }
+
+        // Wire Add-row inside modal (inline add inside modal)
+        const addRowBtn = editModal ? editModal.querySelector('#add-subqty-row') : document.getElementById('add-subqty-row');
+        if (addRowBtn) {
+          addRowBtn.onclick = function(){ addSubqtyRowTo(editModal ? editModal.querySelector('#subqty-tbody') : document.getElementById('subqty-tbody')); };
+        }
+
+        // Show modal
+        showBootstrapModal(editModal || document.getElementById('editProductModal'));
+      } catch (err) {
+        console.error('Error opening edit modal', err);
+      }
+    });
+  });
+
+  // Nested "Manage subunits" open handler - bind to all buttons labeled "openProductSubunitsModal"
+  Array.from(document.querySelectorAll('[id="openProductSubunitsModal"], #openProductSubunitsModal')).forEach(function(openBtn){
+    openBtn.addEventListener('click', function(){
+      const pid = (editModal ? editModal.querySelector('#edit-product-id') : document.getElementById('edit-product-id'))?.value || openBtn.dataset_pid || openBtn.dataset.pid;
+      if (!pid) { alert('Product id missing'); return; }
+      const modal = document.getElementById('productSubunitsModal');
+      const titleEl = (editModal ? editModal.querySelector('#edit-title') : document.getElementById('edit-title'));
+      const productTitle = titleEl ? titleEl.value : ('Product ' + pid);
+      const form = document.getElementById('product-subunits-form');
+      if (form) form.action = `/adminapp/product/${pid}/add-subunits/`;
+      document.getElementById('product-sub-title').innerText = productTitle;
+      const tbody = document.getElementById('product-subtbody');
+      if (tbody) tbody.innerHTML = '';
+
+      fetch(`/adminapp/product/${pid}/subquantities/`, { credentials:'same-origin' })
+        .then(r => r.ok ? r.json() : { results: [] })
+        .then(data => {
+          (data.results || []).forEach(s => addSubqtyRowTo(tbody, s.id, s.name, s.factor_to_base, s.price));
+          showBootstrapModal(modal);
+        }).catch(err => {
+          console.error('Failed to load product subquantities', err);
+          showBootstrapModal(modal);
+        });
+    });
+  });
+
+  // Ensure nested modal "Add row" button works
+  document.getElementById('product-add-subrow')?.addEventListener('click', function(){
+    const tbody = document.getElementById('product-subtbody');
+    addSubqtyRowTo(tbody);
+  });
+
+  // Before outer edit form submit, merge checked unit-sub-checkbox into product subqty rows
+  const outerForm = editForm || document.getElementById('editProductForm');
+  if (outerForm) {
+    outerForm.addEventListener('submit', function(e){
+      const checked = Array.from(document.querySelectorAll('.unit-sub-checkbox:checked'));
+      const existingNames = new Set(Array.from((editModal || document).querySelectorAll('#subqty-tbody .sub-name')).map(i=>i.value.trim()));
+      checked.forEach(cb=>{
+        const name = cb.dataset.name || '';
+        const factor = cb.dataset.factor || '';
+        const price = cb.dataset.price || '';
+        if (!existingNames.has((name||'').trim())){
+          const tbody = editModal ? editModal.querySelector('#subqty-tbody') : document.getElementById('subqty-tbody');
+          addSubqtyRowTo(tbody, '', name, factor, price);
+        }
+      });
+    }, false);
+  }
+
+}); // DOMContentLoaded
+</script>
+
+<script>
+(function(){
+  // Ensure the nested "Manage subunits" modal opens reliably even if the template contains multiple buttons with same id.
+  // This binds to all elements that have id="openProductSubunitsModal" (handles duplicates) and uses current edit-product-id.
+  const openBtns = Array.from(document.querySelectorAll('#openProductSubunitsModal'));
+  if (!openBtns.length) return;
+
+  openBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const pidEl = document.getElementById('edit-product-id');
+      const titleEl = document.getElementById('edit-title');
+      const pid = pidEl ? pidEl.value : (btn.dataset_pid || '');
+      if (!pid) { alert('Product id missing'); return; }
+
+      const modal = document.getElementById('productSubunitsModal');
+      if (!modal) { console.error('productSubunitsModal not found'); return; }
+
+      // set modal form action and title
+      const form = document.getElementById('product-subunits-form');
+      if (form) form.action = `/adminapp/product/${pid}/add-subunits/`;
+      const title = document.getElementById('product-sub-title');
+      if (title) title.innerText = (titleEl && titleEl.value) ? titleEl.value : ('Product ' + pid);
+
+      // populate existing rows
+      const tbody = document.getElementById('product-subtbody');
+      if (tbody) tbody.innerHTML = '';
+      fetch(`/adminapp/product/${pid}/subquantities/`, { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : { results: [] })
+        .then(data => {
+          (data.results || []).forEach(s => {
+            // addModalRow must already be defined earlier in the file
+            if (typeof addModalRow === 'function') {
+              addModalRow(tbody, s.id, s.name, s.factor_to_base, s.price);
+            } else {
+              // fallback simple row creation if addModalRow not present
+              const tr = document.createElement('tr');
+              tr.innerHTML = `<td><input type="text" class="form-control form-control-sm modal-sub-name" name="sub_name[]" value="${s.name||''}" /></td>
+                              <td><input type="number" step="0.000001" class="form-control form-control-sm modal-sub-factor" name="sub_factor[]" value="${s.factor_to_base||''}" /></td>
+                              <td><input type="number" step="0.01" class="form-control form-control-sm" name="sub_price[]" value="${s.price||''}" /></td>
+                              <td style="width:80px;"><input type="hidden" name="sub_id[]" value="${s.id||''}" /><button type="button" class="btn btn-sm btn-danger modal-remove">Remove</button></td>`;
+              tbody.appendChild(tr);
+              tr.querySelector('.modal-remove')?.addEventListener('click', ()=>tr.remove());
+            }
+          });
+        })
+        .catch(err => {
+          console.error('Failed to load product subquantities', err);
+        });
+
+      // show modal (Bootstrap v5)
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+      } else if (window.jQuery && jQuery.fn.modal) {
+        jQuery(modal).modal('show');
+      } else {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+      }
+    });
+  });
+})();
+</script>
+
+{% endblock %}

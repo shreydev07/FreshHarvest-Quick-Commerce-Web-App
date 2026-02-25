@@ -1,0 +1,24 @@
+{% extends 'adminbase.html' %} {% load static %} {% block admin %}
+<div class="row">
+  <div class="col-sm-12">
+    <h3>View Units</h3>
+    <table class="table">
+      <tr>
+        <th>S.No</th>
+        <th>Name</th>
+        <th>Actions</th>
+      </tr>
+      {% for unit in units %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ unit.name }}</td>
+        <td>
+          <a href="{% url 'editunit' unit.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'deleteunit' unit.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
